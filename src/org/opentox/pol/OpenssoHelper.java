@@ -6,12 +6,13 @@ import java.util.*;
 
 public class OpenssoHelper {
 
-	private String url = "http://opensso.in-silico.ch:8180/opensso";
+	
 	private String ssoadm_create = "/ssoadm.jsp?cmd=create-policies";
 	private String ssoadm_delete = "/ssoadm.jsp?cmd=delete-policies";
 	private String ssoadm_list= "/ssoadm.jsp?cmd=list-policies";
 	private String authenticate = "/identity/authenticate";
 	private String logout = "/identity/authenticate/logout";
+	private String url = "";
 	private String user = "";
 	private String pw = "";
 	Rest r = null;
@@ -26,6 +27,7 @@ public class OpenssoHelper {
 			config.load(fis);
 			user = config.getProperty("user"); 
 			pw = config.getProperty("pw");
+			url = config.getProperty("host");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

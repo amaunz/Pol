@@ -1,5 +1,7 @@
 package org.opentox.mysql;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -9,6 +11,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
+
+import org.opentox.pol.OpenssoHelper;
 
 public class MySQL {
 	
@@ -16,25 +21,25 @@ public class MySQL {
 	
 	public void open() {
 		try {
-			//Class.forName("com.mysql.jdbc.Driver").newInstance();
+			InputStream fis = null;
+			String pw = "";
+			String propfile = "org/opentox/pol/admin.properties";
+			fis = OpenssoHelper.class.getClassLoader().getResourceAsStream(propfile);
+			Properties config = new Properties();
+			try {
+				config.load(fis);
+				pw = config.getProperty("pw");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		    conn = DriverManager.getConnection("jdbc:mysql://localhost/Pol?" +
-		                                   "user=root&password=admin123");		   
+		                                   "user=root&password=" + pw);		   
 		} catch (SQLException e) {
 		    // handle any errors
 		    System.out.println("SQLException: " + e.getMessage());
 		    System.out.println("SQLState: " + e.getSQLState());
 		    System.out.println("VendorError: " + e.getErrorCode());
 		} 
-//		catch (InstantiationException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IllegalAccessException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (ClassNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 	}
 	
 	public void close() {
