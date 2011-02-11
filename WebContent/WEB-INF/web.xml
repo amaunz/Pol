@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xmlns="http://java.sun.com/xml/ns/javaee" 
+         xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+                             http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+         id="Pol" 
+         version="2.5">
+
+	<display-name>Policy Web Application</display-name>
+	<description>REST service for Opentox Policy Web Application</description>
+
+	<!--
+		This Wink servlet handles HTTP requests for SDK web services on 
+		the application server
+	-->
+	<servlet>
+	    <!--  JAX-RS provider's servlet -->
+		<servlet-name>restSdkService</servlet-name>
+		<servlet-class>org.apache.wink.server.internal.servlet.RestServlet</servlet-class>
+		<init-param>
+		    <!--  
+			<param-name>applicationConfigLocation</param-name>
+			<param-value>/WEB-INF/application</param-value>
+			-->
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>org.opentox.pol.PolWebApp</param-value>
+		</init-param>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>restSdkService</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
+
+</web-app>
+
+
+  
