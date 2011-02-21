@@ -111,7 +111,7 @@ public class Rest {
 	        String data = "subjectid=" + URLEncoder.encode(subjectid.toString(),"UTF-8");
 	        
 	        //make connection
-			URL url = new URL("http://opensso.in-silico.ch:8180/opensso/identity/logout");
+			URL url = new URL(sso_url + "/identity/logout");
 			Connect(url);
 			HttpURLConnection urlc = (HttpURLConnection) c;
 	
