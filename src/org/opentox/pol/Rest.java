@@ -4,13 +4,26 @@ import java.io.*;
 import java.net.*;
 import org.opentox.pol.httpreturn.*;
 import java.net.URLEncoder;
+import java.util.Properties;
 
 
 public class Rest {
+	
+	private String sso_url = "";
 
 	public URLConnection c;
 	public Rest(){
 		c=null;
+		InputStream fis = null;
+		String propfile = "org/opentox/pol/admin.properties";
+		fis = OpenssoHelper.class.getClassLoader().getResourceAsStream(propfile);
+		Properties config = new Properties();
+		try {
+			config.load(fis);
+			sso_url = config.getProperty("host");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void Connect(URL u) {
@@ -53,7 +66,7 @@ public class Rest {
 	        data += "&attributes_names=uid";
 	        
 			//make connection
-			URL url = new URL("http://opensso.in-silico.ch:8180/opensso/identity/attributes");
+			URL url = new URL(sso_url + "/identity/attributes");
 			Connect(url);
 			HttpURLConnection urlc = (HttpURLConnection) c;
 	
