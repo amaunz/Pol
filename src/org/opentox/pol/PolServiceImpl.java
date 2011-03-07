@@ -263,9 +263,8 @@ public class PolServiceImpl implements PolService {
 							if (path.contains("/metadata/-*-")) { ok=true; }
 							if (path.contains("/conformer/-*-")) { ok=true; }
 							if (path.contains("/model/-*-")) { ok=true; }
-							//if (path.contains("/model/-*-/predicted")) { ok=true; }
-							//if (path.contains("/model/-*-/independent")) { ok=true; }
-							//if (path.contains("/model/-*-/dependent")) { ok=true; }
+							if (path.contains("/algorithm/CDKPhysChem/-*-")) { ok=true; }
+							if (path.contains("/algorithm/JOELIB2/-*-")) { ok=true; }
 						}
 						if (!ok) {
 							throw new WebApplicationException(Response.status(400).entity("Resource '" + resName + "' has illegal wildcards.\n\n").type("text/plain").build());
@@ -307,6 +306,7 @@ public class PolServiceImpl implements PolService {
 				Policy p = it.next();
 				polName=p.getName();
 				resNames=p.getResources();
+				
 				try {	
 					// Search through list of res names       	
 					for (int i=0; i<resNames.size(); i++) {
