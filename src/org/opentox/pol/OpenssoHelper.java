@@ -31,6 +31,13 @@ public class OpenssoHelper {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		finally {
+			try {
+				fis.close();
+			} catch (IOException e) {
+				// ignore
+			}
+		}
 	}
 
 
