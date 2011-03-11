@@ -32,6 +32,13 @@ public class MySQL {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			finally {
+				try {
+					fis.close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
 		    conn = DriverManager.getConnection("jdbc:mysql://localhost/Pol?" +
 		                                   "user=root&password=" + pw);		   
 		} catch (SQLException e) {
