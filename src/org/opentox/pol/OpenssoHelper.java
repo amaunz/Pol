@@ -45,6 +45,7 @@ public class OpenssoHelper {
 
 		String data = null;
 		ErrorInfo ei = null;
+		InputStreamReader iss = null;
 
 		try {
 			data = "username=" + URLEncoder.encode(user,"UTF-8") + "&password=" + URLEncoder.encode(pw,"UTF-8");
@@ -68,11 +69,14 @@ public class OpenssoHelper {
 
 			String answer = null;
 			int status=0;
-			answer=BrToString(new BufferedReader(new InputStreamReader(urlc.getInputStream())));
+			
+			iss = new InputStreamReader(urlc.getInputStream());
+			answer=BrToString(new BufferedReader(iss));
 			status = urlc.getResponseCode();
 			if (answer != null) {
 				ei = new ErrorInfo(answer, status);
 			}
+			iss.close();
 		}
 
 		return ei;
@@ -83,6 +87,7 @@ public class OpenssoHelper {
 
 		String data = null;
 		ErrorInfo ei = null;
+		InputStreamReader iss = null;
 
 		try {
 			data = "subjectid=" + URLEncoder.encode(token,"UTF-8");
@@ -106,11 +111,13 @@ public class OpenssoHelper {
 
 			String answer = null;
 			int status=0;
-			answer=BrToString(new BufferedReader(new InputStreamReader(urlc.getInputStream())));
+			iss = new InputStreamReader(urlc.getInputStream());
+			answer=BrToString(new BufferedReader(iss));
 			status = urlc.getResponseCode();
 			if (answer != null) {
 				ei = new ErrorInfo(answer, status);
 			}
+			iss.close();
 		}
 
 		return ei;
@@ -123,6 +130,7 @@ public class OpenssoHelper {
 		String realm="/";
 		String data = null;
 		ErrorInfo ei = null;
+		InputStreamReader iss = null;
 
 		try {
 			data = "realm=" + URLEncoder.encode(realm,"UTF-8") + 
@@ -149,11 +157,13 @@ public class OpenssoHelper {
 
 			String answer = null;
 			int status=0;
-			answer = BrToString(new BufferedReader(new InputStreamReader(urlc.getInputStream())));
+			iss = new InputStreamReader(urlc.getInputStream());
+			answer = BrToString(new BufferedReader(iss));
 			status = urlc.getResponseCode();
 			if (answer != null) {
 				ei = new ErrorInfo(answer, status);
 			}
+			iss.close();
 		}
 
 		return ei;
@@ -165,7 +175,8 @@ public class OpenssoHelper {
 		String realm="/";
 		String data = null;
 		ErrorInfo ei = null;
-
+		InputStreamReader iss = null;
+		
 		try {
 			data = "policynames=" + URLEncoder.encode(polname,"UTF-8") + 
 			"&realm=" + URLEncoder.encode(realm,"UTF-8") + 
@@ -191,11 +202,13 @@ public class OpenssoHelper {
 
 			String answer = null;
 			int status=0;
-			answer = BrToString(new BufferedReader(new InputStreamReader(urlc.getInputStream())));
+			iss = new InputStreamReader(urlc.getInputStream());
+			answer = BrToString(new BufferedReader(iss));
 			status = urlc.getResponseCode();
 			if (answer != null) {
 				ei = new ErrorInfo(answer, status);
 			}
+			iss.close();
 		}
 
 		return ei;
@@ -207,6 +220,7 @@ public class OpenssoHelper {
 		String realm="/";
 		String data = null;
 		ErrorInfo ei = null;
+		InputStreamReader iss = null;
 
 		try {
 			data = "policynames=" + URLEncoder.encode(polname,"UTF-8") + 
@@ -233,11 +247,13 @@ public class OpenssoHelper {
 
 			String answer = null;
 			int status=0;
-			answer = BrToString(new BufferedReader(new InputStreamReader(urlc.getInputStream())));
+			iss = new InputStreamReader(urlc.getInputStream());
+			answer = BrToString(new BufferedReader(iss));
 			status = urlc.getResponseCode();
 			if (answer != null) {
 				ei = new ErrorInfo(answer, status);
 			}
+			iss.close();
 		}
 
 		return ei;
@@ -245,6 +261,7 @@ public class OpenssoHelper {
 	}
 
 
+	/*
 	public String readFile() throws IOException {
 		File file = new File("/home/am/aa/Pol-REST/andi.xml");
 		FileInputStream fis = null;
@@ -264,6 +281,7 @@ public class OpenssoHelper {
 		} 
 		return fcont;
 	}
+	*/
 
 
 	public String BrToString (BufferedReader br) {

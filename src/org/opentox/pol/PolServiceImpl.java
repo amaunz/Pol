@@ -653,7 +653,9 @@ public class PolServiceImpl implements PolService {
 		Serializer serializer = new Serializer(out);
 		serializer.setIndent(4);  // or whatever you like
 		serializer.write(new Builder().build(xml, ""));
-		return out.toString("UTF-8");
+		String s=out.toString("UTF-8");
+		out.close();
+		return s;
 	}
 
 	public final boolean ValidateIPAddress(String ipAddress) {

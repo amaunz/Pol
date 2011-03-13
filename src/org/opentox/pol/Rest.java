@@ -54,9 +54,7 @@ public class Rest {
 	      System.out.println("Rest: Could not open output stream: " + e.getMessage());
 	    }
 	    finally {
-	      if (ps != null) {
 	        ps.close();
-	      }
 	   }
 	}
 
@@ -67,6 +65,7 @@ public class Rest {
     	
     	try {
 	    	BufferedReader br = null;
+	    	InputStreamReader iss = null;
 	    	
 	    	//set data
 	        String data = "subjectid=" + URLEncoder.encode(subjectid.toString(),"UTF-8");
@@ -87,7 +86,8 @@ public class Rest {
 			ps.close();
 	
 			//get result
-			br = new BufferedReader(new InputStreamReader(urlc.getInputStream()));
+			iss = new InputStreamReader(urlc.getInputStream());
+			br = new BufferedReader(iss);
 	        status = urlc.getResponseCode();
 			String l = "";
 			boolean found=false;
@@ -102,6 +102,7 @@ public class Rest {
 				string=l.substring(l.indexOf('=')+1);
 			}
 			br.close();
+			iss.close();
 			if (string == null) System.out.println("NAME IS NULL");
     	} 
     	catch (IOException e) {
