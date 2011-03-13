@@ -136,7 +136,7 @@ public class PolServiceImpl implements PolService {
 						if (body) sb2.append(line).append("\n");
 					}
 					temp2 = File.createTempFile("opensso-policy2-",".xml");	out2 = new FileOutputStream(temp2);	PrintStream p2 = new PrintStream (out2); p2.println(sb2.toString());
-					temp2.deleteOnExit();
+					//temp2.deleteOnExit();
 				}
 				finally {
 					reader.close();
@@ -153,7 +153,9 @@ public class PolServiceImpl implements PolService {
 			exception=new WebApplicationException(Response.status(500).entity("IOException. Please contact administrator.\n\n").type("text/plain").build());
 		}
 
+		
 		if (exception!=null) {
+			temp2.delete();
 			System.out.println(exception.getMessage());
 			throw exception;
 		}
@@ -169,6 +171,9 @@ public class PolServiceImpl implements PolService {
 				e.printStackTrace();
 				System.out.println("Malformed XML.");
 				throw new WebApplicationException(Response.status(400).entity("Malformed XML.\n\n").type("text/plain").build());
+			}
+			finally {
+				temp2.delete();
 			}
 			String polName = null;
 			ArrayList<String> resNames = null;
@@ -330,10 +335,8 @@ public class PolServiceImpl implements PolService {
 				}
 			}
 			System.out.println("E: Create pol");
-			return Response.ok(output_short).type("text/plain").build();
-
+			return Response.ok(output_short).type("text/plain").build();			
 		}
-
 	}
 
 
