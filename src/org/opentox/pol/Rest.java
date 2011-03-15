@@ -62,11 +62,12 @@ public class Rest {
 
     	int status = 0;
     	String string = null;
+    	PrintStream ps = null;
+    	BufferedReader br = null;
+    	InputStreamReader iss = null;
     	
     	try {
-	    	BufferedReader br = null;
-	    	InputStreamReader iss = null;
-	    	
+	    		
 	    	//set data
 	        String data = "subjectid=" + URLEncoder.encode(subjectid.toString(),"UTF-8");
 	        data += "&attributes_names=uid";
@@ -81,9 +82,8 @@ public class Rest {
 			urlc.setAllowUserInteraction(false);
 	
 			//send query
-			PrintStream ps = new PrintStream(urlc.getOutputStream());
+			ps = new PrintStream(urlc.getOutputStream());
 			ps.print(data);
-			ps.close();
 	
 			//get result
 			iss = new InputStreamReader(urlc.getInputStream());
@@ -101,11 +101,18 @@ public class Rest {
 				l=br.readLine();
 				string=l.substring(l.indexOf('=')+1);
 			}
-			br.close();
-			iss.close();
 			if (string == null) System.out.println("NAME IS NULL");
     	} 
     	catch (IOException e) {
+    	}
+    	finally {
+    		ps.close();
+    		try {
+				br.close();
+				iss.close();
+			} catch (IOException e) {
+				// ignore
+			}
     	}
     	
         return new HttpReturn(status, string);
@@ -114,6 +121,7 @@ public class Rest {
     
     public HttpReturn LogOut(String subjectid) {   	
 	   	int status = 0;
+	   	PrintStream ps=null;
 	   	try {
 	    	//set data
 	        String data = "subjectid=" + URLEncoder.encode(subjectid.toString(),"UTF-8");
@@ -128,14 +136,16 @@ public class Rest {
 			urlc.setAllowUserInteraction(false);
 			
 			//send query
-			PrintStream ps = new PrintStream(urlc.getOutputStream());
+			ps = new PrintStream(urlc.getOutputStream());
 			ps.print(data);
-			ps.close();
 			
 			//get result
 	        status = urlc.getResponseCode();        
 	    } 
 		catch (IOException e) {
+		}
+		finally {
+			ps.close();
 		}
 		return new HttpReturn(status, "");  
     }

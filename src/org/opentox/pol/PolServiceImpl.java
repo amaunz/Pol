@@ -93,8 +93,10 @@ public class PolServiceImpl implements PolService {
 		MySQL s = new MySQL();	// database object to store rows of (policy name, user, resource).
 		Iterator<Policy> it;			// runs policies found in the XML
 
-		BufferedReader reader = null;	//	
+		BufferedReader reader = null;	//
+		InputStreamReader iss = null;
 		FileOutputStream out2 = null;	//
+		PrintStream p2 = null;
 
 		boolean resources_untouched = true;			// Control conditions on uploaded policy
 		boolean IP_check_ok = true;					//
@@ -128,19 +130,27 @@ public class PolServiceImpl implements PolService {
 			if (is != null) {
 				String line;
 				try {
-					reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+					iss = new InputStreamReader(is, "UTF-8");
+					reader = new BufferedReader(iss);
 					boolean body = false;
 					while ((line = reader.readLine()) != null) {
 						sb.append(line).append("\n");
 						if (line.contains("<Policies>")) body = true;
 						if (body) sb2.append(line).append("\n");
 					}
-					temp2 = File.createTempFile("opensso-policy2-",".xml");	out2 = new FileOutputStream(temp2);	PrintStream p2 = new PrintStream (out2); p2.println(sb2.toString());
+					temp2 = File.createTempFile("opensso-policy2-",".xml");	
+					
+					out2 = new FileOutputStream(temp2);	
+					p2 = new PrintStream (out2); 
+					p2.println(sb2.toString());
+					
 					//temp2.deleteOnExit();
 				}
 				finally {
 					reader.close();
 					is.close();
+					iss.close();
+					p2.close();
 					out2.close();
 				}
 			} 
@@ -683,6 +693,7 @@ public class PolServiceImpl implements PolService {
 				found = true;
 			}
 		}
+		reader.close();
 		return ("");
 	}
 
