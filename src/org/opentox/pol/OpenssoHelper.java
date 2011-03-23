@@ -47,6 +47,7 @@ public class OpenssoHelper {
 		ErrorInfo ei = null;
 		InputStreamReader iss = null;
 		BufferedReader br = null;
+		HttpURLConnection urlc = null;
 
 		try {
 			data = "username=" + URLEncoder.encode(user,"UTF-8") + "&password=" + URLEncoder.encode(pw,"UTF-8");
@@ -65,7 +66,7 @@ public class OpenssoHelper {
 				e.printStackTrace();
 			}
 
-			HttpURLConnection urlc = (HttpURLConnection) r.c;
+			urlc = (HttpURLConnection) r.c;
 			r.Send(urlc, data);
 
 			String answer = null;
@@ -80,6 +81,7 @@ public class OpenssoHelper {
 			}
 			iss.close();
 			br.close();
+			urlc.disconnect();
 		}
 
 		return ei;
@@ -92,6 +94,7 @@ public class OpenssoHelper {
 		ErrorInfo ei = null;
 		InputStreamReader iss = null;
 		BufferedReader br = null;
+		HttpURLConnection urlc = null;
 
 		try {
 			data = "subjectid=" + URLEncoder.encode(token,"UTF-8");
@@ -110,7 +113,7 @@ public class OpenssoHelper {
 				e.printStackTrace();
 			}
 
-			HttpURLConnection urlc = (HttpURLConnection) r.c;
+			urlc = (HttpURLConnection) r.c;
 			r.Send(urlc, data);
 
 			String answer = null;
@@ -124,6 +127,7 @@ public class OpenssoHelper {
 			}
 			iss.close();
 			br.close();
+			urlc.disconnect();
 		}
 
 		return ei;
@@ -138,6 +142,7 @@ public class OpenssoHelper {
 		ErrorInfo ei = null;
 		InputStreamReader iss = null;
 		BufferedReader br = null;
+		HttpURLConnection urlc = null;
 
 		try {
 			data = "realm=" + URLEncoder.encode(realm,"UTF-8") + 
@@ -158,7 +163,7 @@ public class OpenssoHelper {
 				e.printStackTrace();
 			}
 
-			HttpURLConnection urlc = (HttpURLConnection) r.c;
+			urlc = (HttpURLConnection) r.c;
 			urlc.addRequestProperty("Cookie","iPlanetDirectoryPro=\"" + token + "\"");
 			r.Send(urlc, data);
 
@@ -173,6 +178,7 @@ public class OpenssoHelper {
 			}
 			iss.close();
 			br.close();
+			urlc.disconnect();
 		}
 
 		return ei;
@@ -186,6 +192,7 @@ public class OpenssoHelper {
 		ErrorInfo ei = null;
 		InputStreamReader iss = null;
 		BufferedReader br = null;
+		HttpURLConnection urlc = null;
 		
 		try {
 			data = "policynames=" + URLEncoder.encode(polname,"UTF-8") + 
@@ -206,7 +213,7 @@ public class OpenssoHelper {
 				e.printStackTrace();
 			}
 
-			HttpURLConnection urlc = (HttpURLConnection) r.c;
+			urlc = (HttpURLConnection) r.c;
 			urlc.addRequestProperty("Cookie","iPlanetDirectoryPro=\"" + token + "\"");
 			r.Send(urlc, data);
 
@@ -221,6 +228,7 @@ public class OpenssoHelper {
 			}
 			iss.close();
 			br.close();
+			urlc.disconnect();
 		}
 
 		return ei;
@@ -234,6 +242,7 @@ public class OpenssoHelper {
 		ErrorInfo ei = null;
 		InputStreamReader iss = null;
 		BufferedReader br = null;
+		HttpURLConnection urlc = null;
 
 		try {
 			data = "policynames=" + URLEncoder.encode(polname,"UTF-8") + 
@@ -254,7 +263,7 @@ public class OpenssoHelper {
 				e.printStackTrace();
 			}
 
-			HttpURLConnection urlc = (HttpURLConnection) r.c;
+			urlc = (HttpURLConnection) r.c;
 			urlc.addRequestProperty("Cookie","iPlanetDirectoryPro=\"" + token + "\"");
 			r.Send(urlc, data);
 
@@ -269,6 +278,7 @@ public class OpenssoHelper {
 			}
 			iss.close();
 			br.close();
+			urlc.disconnect();
 		}
 
 		return ei;

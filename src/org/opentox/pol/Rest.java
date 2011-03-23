@@ -65,6 +65,7 @@ public class Rest {
     	PrintStream ps = null;
     	BufferedReader br = null;
     	InputStreamReader iss = null;
+    	HttpURLConnection urlc = null;
     	
     	try {
 	    		
@@ -75,7 +76,7 @@ public class Rest {
 			//make connection
 			URL url = new URL(sso_url + "/identity/attributes");
 			Connect(url);
-			HttpURLConnection urlc = (HttpURLConnection) c;
+			urlc = (HttpURLConnection) c;
 	
 			//use post mode
 			urlc.setDoOutput(true);
@@ -107,6 +108,7 @@ public class Rest {
     	}
     	finally {
     		ps.close();
+    		urlc.disconnect();
     		try {
 				br.close();
 				iss.close();
@@ -122,6 +124,7 @@ public class Rest {
     public HttpReturn LogOut(String subjectid) {   	
 	   	int status = 0;
 	   	PrintStream ps=null;
+	   	HttpURLConnection urlc=null;
 	   	try {
 	    	//set data
 	        String data = "subjectid=" + URLEncoder.encode(subjectid.toString(),"UTF-8");
@@ -129,7 +132,7 @@ public class Rest {
 	        //make connection
 			URL url = new URL(sso_url + "/identity/logout");
 			Connect(url);
-			HttpURLConnection urlc = (HttpURLConnection) c;
+			urlc = (HttpURLConnection) c;
 	
 			//use post mode
 			urlc.setDoOutput(true);
@@ -140,12 +143,15 @@ public class Rest {
 			ps.print(data);
 			
 			//get result
-	        status = urlc.getResponseCode();        
+	        status = urlc.getResponseCode();
+	        
 	    } 
 		catch (IOException e) {
 		}
 		finally {
 			ps.close();
+			urlc.disconnect();
+			
 		}
 		return new HttpReturn(status, "");  
     }

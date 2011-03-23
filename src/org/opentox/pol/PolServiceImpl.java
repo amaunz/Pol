@@ -343,6 +343,9 @@ public class PolServiceImpl implements PolService {
 					}
 					throw new WebApplicationException(Response.status(500).entity("Exception in mysql backend.\n\n").type("text/plain").build());
 				}
+				finally {
+					s.close();
+				}
 			}
 			System.out.println("E: Create pol");
 			return Response.ok(output_short).type("text/plain").build();			
@@ -383,6 +386,9 @@ public class PolServiceImpl implements PolService {
 		}
 		catch (Exception e) {
 			throw new WebApplicationException(Response.status(500).entity("Exception in mysql backend.\n\n").type("text/plain").build());
+		}
+		finally {
+			s.close();
 		}
 		System.out.println("id: '" + id + "'");
 		System.out.println("db user: '" + db_user + "'");
@@ -454,6 +460,7 @@ public class PolServiceImpl implements PolService {
 
 		String res = null;
 		String token_user = null;
+		MySQL s = null;
 
 		System.out.println("   S: Get pol (i)");
 		// Resolve user from token
@@ -473,7 +480,7 @@ public class PolServiceImpl implements PolService {
 			System.out.println("   Searching owner of uri '" + uri + "'.");
 			// get owner of URI
 			try {
-				MySQL s = new MySQL();
+				s = new MySQL();
 				s.open();
 				String[] res_arr;
 				if (polnames == null) {
@@ -486,10 +493,13 @@ public class PolServiceImpl implements PolService {
 					res = res_arr[1];
 					res += res_arr[2];
 				}
-				s.close();
+				
 			}
 			catch (Exception e) {
 				throw new WebApplicationException(Response.status(500).entity("Exception in mysql backend.\n\n").type("text/plain").build());
+			}
+			finally {
+				s.close();
 			}
 		}
 
@@ -500,13 +510,16 @@ public class PolServiceImpl implements PolService {
 			System.out.println("   Searching policies of token user '" + token_user + "'.");			
 			// get all policies owned by token user
 			try {
-				MySQL s = new MySQL();
+				s = new MySQL();
 				s.open();
 				res = s.search_users_pols(token_user);
 				s.close();
 			}
 			catch (Exception e) {
 				throw new WebApplicationException(Response.status(500).entity("Exception in mysql backend.\n\n").type("text/plain").build());
+			}
+			finally {
+				s.close();
 			}
 		}
 
