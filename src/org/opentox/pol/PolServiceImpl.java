@@ -81,22 +81,29 @@ public class PolServiceImpl implements PolService {
 	 *  @param subjectid
 	 *  @return Response
 	 */
-	public Response createPol(@HeaderParam("subjectid") String subjectId, @Context UriInfo uriInfo, InputStream is) 
-	throws WebApplicationException {
+	public Response createPol(@HeaderParam("subjectid") String subjectId, @Context UriInfo uriInfo, InputStream is) throws WebApplicationException {
 
-		//		Status status = null;			// ssoadm return code 
 		WebApplicationException exception=null;		// general purpose exception (thrown when status != null)
 
-		File temp2 = null;				// Temp file without XML header 
-		String token_user = null;				// user as encoded by subjectid (=token)
+		File temp2 = null;							// Temp file without XML header 
+		String token_user = null;					// user as encoded by subjectid (=token)
 
-		MySQL s = new MySQL();	// database object to store rows of (policy name, user, resource).
-		Iterator<Policy> it;			// runs policies found in the XML
+		MySQL s = new MySQL();						// database object to store rows of (policy name, user, resource).
+		Iterator<Policy> it;						// runs policies found in the XML
 
-		BufferedReader reader = null;	//
+		// READING 
+		BufferedReader reader = null;
 		InputStreamReader iss = null;
-		FileOutputStream out2 = null;	//
+		FileOutputStream out2 = null;
 		PrintStream p2 = null;
+
+		// PARSE XML
+		ParsePolicy pp = null;
+		String polName = null;
+		ArrayList<String> resNames = null;
+		String[] resource_registered_name = new String[2];
+		String db_user = null;
+		String db_resource = null;
 
 		boolean resources_untouched = true;			// Control conditions on uploaded policy
 		boolean IP_check_ok = true;					//
@@ -138,20 +145,19 @@ public class PolServiceImpl implements PolService {
 						if (line.contains("<Policies>")) body = true;
 						if (body) sb2.append(line).append("\n");
 					}
-					temp2 = File.createTempFile("opensso-policy2-",".xml");	
-					
+					temp2 = File.createTempFile("opensso-policy2-",".xml");				
 					out2 = new FileOutputStream(temp2);	
 					p2 = new PrintStream (out2); 
 					p2.println(sb2.toString());
-					
+
 					//temp2.deleteOnExit();
 				}
 				finally {
-					reader.close();
-					is.close();
-					iss.close();
 					p2.close();
 					out2.close();
+					reader.close();
+					iss.close();
+					is.close();
 				}
 			} 
 			else {       
@@ -162,17 +168,17 @@ public class PolServiceImpl implements PolService {
 		} catch(IOException e) {
 			exception=new WebApplicationException(Response.status(500).entity("IOException. Please contact administrator.\n\n").type("text/plain").build());
 		}
-
-		
+		//		finally {
 		if (exception!=null) {
 			temp2.delete();
 			System.out.println(exception.getMessage());
 			throw exception;
 		}
+		//		}
 
 		else {
-			// Parse XML
-			ParsePolicy pp = new ParsePolicy();
+			
+			pp = new ParsePolicy();
 			ArrayList<Policy> polres = null;
 			try {
 				polres = pp.runParser(temp2.getAbsolutePath());
@@ -185,57 +191,48 @@ public class PolServiceImpl implements PolService {
 			finally {
 				temp2.delete();
 			}
-			String polName = null;
-			ArrayList<String> resNames = null;
-			String[] resource_registered_name = new String[2];
-			String db_user = null;
-			String db_resource = null;
+
 
 			it = polres.iterator();
-			try {
 
-				while(it.hasNext()) {
-					Policy p = it.next();
-					polName=p.getName();
-					System.out.println("Create Policy '" + polName + "'");
-					resNames=p.getResources();
-					// Proceed only for new policy name
-					s.open();
-					if (!(s.search_pol_name(polName))) {
-						s.close();
-						if (resNames.size() <= max_nr_resources_per_pol) {
-							for (int i=0; i<resNames.size(); i++) {
-								s.open();
-								resource_registered_name = s.search_res(resNames.get(i));
-								s.close();
-								// check resource URI
-								if (resource_registered_name[0] != null) {
-									db_resource = resource_registered_name[0];
-									db_user = resource_registered_name[1];
-								}
-								if (db_resource != null && !(db_user.equals(token_user))) {
-									resources_untouched = false;
-									break;
-								}
+			while(it.hasNext()) {
+				Policy p = it.next();
+				polName=p.getName();
+				System.out.println("Create Policy '" + polName + "'");
+				resNames=p.getResources();
+				// Proceed only for new policy name
+				s.open();
+				if (!(s.search_pol_name(polName))) {
+					s.close();
+					if (resNames.size() <= max_nr_resources_per_pol) {
+						for (int i=0; i<resNames.size(); i++) {
+							s.open();
+							resource_registered_name = s.search_res(resNames.get(i));
+							s.close();
+							// check resource URI
+							if (resource_registered_name[0] != null) {
+								db_resource = resource_registered_name[0];
+								db_user = resource_registered_name[1];
+							}
+							if (db_resource != null && !(db_user.equals(token_user))) {
+								resources_untouched = false;
+								break;
 							}
 						}
-						else {
-							s.close();
-							nr_resources_below_max = false;
-						}
-					} // end if (!(s.search_pol_name(polName)))
-					else policy_is_new = false;
-
-					if (!resources_untouched || !IP_check_ok || !nr_resources_below_max || !policy_is_new ) {
-						break;
 					}
+					else {
+						s.close();
+						nr_resources_below_max = false;
+					}
+				} // end if (!(s.search_pol_name(polName)))
+				else policy_is_new = false;
 
-				} // end while loop for policies.
+				if (!resources_untouched || !IP_check_ok || !nr_resources_below_max || !policy_is_new ) {
+					break;
+				}
 
-
-			} finally {
-
-			}
+			} // end while loop for policies.
+ 
 
 			if (!resources_untouched) {
 				System.out.println("Resource '" +  db_resource + "' already registered by user '" + db_user + "'.");		
@@ -267,7 +264,7 @@ public class PolServiceImpl implements PolService {
 					}
 					String path = aURL.getPath();
 
-					
+
 					// Disallow global wildcards
 					if (resName.indexOf("*") != -1) {
 						boolean ok = false;
@@ -321,7 +318,7 @@ public class PolServiceImpl implements PolService {
 				Policy p = it.next();
 				polName=p.getName();
 				resNames=p.getResources();
-				
+
 				try {	
 					// Search through list of res names       	
 					for (int i=0; i<resNames.size(); i++) {
@@ -493,7 +490,7 @@ public class PolServiceImpl implements PolService {
 					res = res_arr[1];
 					res += res_arr[2];
 				}
-				
+
 			}
 			catch (Exception e) {
 				throw new WebApplicationException(Response.status(500).entity("Exception in mysql backend.\n\n").type("text/plain").build());
@@ -513,7 +510,6 @@ public class PolServiceImpl implements PolService {
 				s = new MySQL();
 				s.open();
 				res = s.search_users_pols(token_user);
-				s.close();
 			}
 			catch (Exception e) {
 				throw new WebApplicationException(Response.status(500).entity("Exception in mysql backend.\n\n").type("text/plain").build());
@@ -556,10 +552,12 @@ public class PolServiceImpl implements PolService {
 		try {
 			s.open();
 			db_user = s.search_user_by_pol(id);
-			s.close();
 		}
 		catch (Exception e) {
 			throw new WebApplicationException(Response.status(500).entity("Exception in mysql backend.\n\n").type("text/plain").build());
+		}
+		finally {
+			s.close();
 		}
 		System.out.println("db user: '" + db_user + "'");
 
@@ -675,7 +673,9 @@ public class PolServiceImpl implements PolService {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		Serializer serializer = new Serializer(out);
 		serializer.setIndent(4);  // or whatever you like
-		serializer.write(new Builder().build(xml, ""));
+		Builder b = new Builder();
+		Document d = b.build(xml, "");
+		serializer.write(d);
 		String s=out.toString("UTF-8");
 		out.close();
 		return s;
@@ -698,7 +698,8 @@ public class PolServiceImpl implements PolService {
 
 	public final String GetSsoOutput (String str) throws IOException { 
 		String str2;
-		BufferedReader reader = new BufferedReader(new StringReader(str));
+		StringReader stringReader = new StringReader(str);
+		BufferedReader reader = new BufferedReader(stringReader);
 		boolean found=false;
 		while ((str2 = reader.readLine()) != null) {
 			if (found) return str2 + "\n\n";
@@ -707,6 +708,7 @@ public class PolServiceImpl implements PolService {
 			}
 		}
 		reader.close();
+		stringReader.close();
 		return ("");
 	}
 
@@ -720,7 +722,8 @@ public class PolServiceImpl implements PolService {
 			e.printStackTrace();
 		}
 		in.close();
-		return (parser.getText());
+		String result = parser.getText(); 
+		return (result);
 	}
 
 	/**

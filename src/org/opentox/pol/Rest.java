@@ -8,9 +8,8 @@ import java.util.Properties;
 
 
 public class Rest {
-	
-	private String sso_url = "";
 
+	private String sso_url = "";
 	public URLConnection c;
 	public Rest(){
 		c=null;
@@ -32,128 +31,151 @@ public class Rest {
 			}
 		}
 	}
-	
-	public void Connect(URL u) {
-	    try {
-	      c = u.openConnection();
-	    }
-	    catch (IOException e) {
-	      System.out.println("Rest: " + e.getMessage());
-	    }
-	  }
 
-	public void Send(HttpURLConnection urlc, String data) {
-	    urlc.setDoOutput(true);
-	    urlc.setAllowUserInteraction(false);
-	    PrintStream ps = null;
-	    try {
-	      ps = new PrintStream(urlc.getOutputStream());
-	      ps.print(data);
-	    }
-	    catch (IOException e){
-	      System.out.println("Rest: Could not open output stream: " + e.getMessage());
-	    }
-	    finally {
-	        ps.close();
-	   }
+	public void Connect(URL u) {
+		try {
+			c = u.openConnection();
+		}
+		catch (IOException e) {
+			System.out.println("Rest: " + e.getMessage());
+		}
 	}
 
-    public HttpReturn DoIdCall(String subjectid) {
+	public void Send(HttpURLConnection urlc, String data) {
+		urlc.setDoOutput(true);
+		urlc.setAllowUserInteraction(false);
+		PrintStream ps = null;
+		OutputStream outputStream = null;
+		try {
+			outputStream = urlc.getOutputStream();
+			ps = new PrintStream(outputStream);
+			ps.print(data);
+			outputStream.flush();
+		}
+		catch (IOException e){
+			System.out.println("Rest: Could not open output stream: " + e.getMessage());
+		}
+		finally {
+			ps.close();
+			try {
+				outputStream.close();
+			} catch (IOException e) {
+				// ignore
+			}
+		}
+	}
 
-    	int status = 0;
-    	String string = null;
-    	PrintStream ps = null;
-    	BufferedReader br = null;
-    	InputStreamReader iss = null;
-    	HttpURLConnection urlc = null;
-    	
-    	try {
-	    		
-	    	//set data
-	        String data = "subjectid=" + URLEncoder.encode(subjectid.toString(),"UTF-8");
-	        data += "&attributes_names=uid";
-	        
+	public HttpReturn DoIdCall(String subjectid) {
+
+		int status = 0;
+		String string = null;
+		PrintStream ps = null;
+		BufferedReader br = null;
+		InputStreamReader iss = null;
+		HttpURLConnection urlc = null;
+		OutputStream outputStream = null;
+		InputStream inputStream = null;
+
+		try {
+
+			//set data
+			String data = "subjectid=" + URLEncoder.encode(subjectid.toString(),"UTF-8");
+			data += "&attributes_names=uid";
+
 			//make connection
 			URL url = new URL(sso_url + "/identity/attributes");
 			Connect(url);
 			urlc = (HttpURLConnection) c;
-	
+
 			//use post mode
 			urlc.setDoOutput(true);
 			urlc.setAllowUserInteraction(false);
-	
+
 			//send query
-			ps = new PrintStream(urlc.getOutputStream());
+			outputStream = urlc.getOutputStream();
+			ps = new PrintStream(outputStream);
 			ps.print(data);
-	
+			outputStream.flush();
+
+
 			//get result
-			iss = new InputStreamReader(urlc.getInputStream());
+			inputStream = urlc.getInputStream();
+			iss = new InputStreamReader(inputStream);
 			br = new BufferedReader(iss);
-	        status = urlc.getResponseCode();
+			status = urlc.getResponseCode();
 			String l = "";
 			boolean found=false;
 			while ((l=br.readLine())!=null) {
-	            if (l.indexOf("userdetails.attribute.name=uid")!=-1) {
-	            	found=true;
-	            	break;
-	            }
+				if (l.indexOf("userdetails.attribute.name=uid")!=-1) {
+					found=true;
+					break;
+				}
 			}
 			if (found) {
 				l=br.readLine();
 				string=l.substring(l.indexOf('=')+1);
 			}
 			if (string == null) System.out.println("NAME IS NULL");
-    	} 
-    	catch (IOException e) {
-    	}
-    	finally {
-    		ps.close();
-    		urlc.disconnect();
-    		try {
+		} 
+		catch (IOException e) {
+		}
+		finally {
+			try {
+				inputStream.close();
+				outputStream.close();
+				ps.close();
+				urlc.disconnect();
 				br.close();
 				iss.close();
 			} catch (IOException e) {
 				// ignore
 			}
-    	}
-    	
-        return new HttpReturn(status, string);
-        
+		}
+
+		return new HttpReturn(status, string);
+
 	}
-    
-    public HttpReturn LogOut(String subjectid) {   	
-	   	int status = 0;
-	   	PrintStream ps=null;
-	   	HttpURLConnection urlc=null;
-	   	try {
-	    	//set data
-	        String data = "subjectid=" + URLEncoder.encode(subjectid.toString(),"UTF-8");
-	        
-	        //make connection
+
+	public HttpReturn LogOut(String subjectid) {   	
+		int status = 0;
+		PrintStream ps=null;
+		HttpURLConnection urlc=null;
+		OutputStream outputStream = null;
+		
+		try {
+			//set data
+			String data = "subjectid=" + URLEncoder.encode(subjectid.toString(),"UTF-8");
+
+			//make connection
 			URL url = new URL(sso_url + "/identity/logout");
 			Connect(url);
 			urlc = (HttpURLConnection) c;
-	
+
 			//use post mode
 			urlc.setDoOutput(true);
 			urlc.setAllowUserInteraction(false);
-			
+
 			//send query
-			ps = new PrintStream(urlc.getOutputStream());
+			outputStream = urlc.getOutputStream();
+			ps = new PrintStream(outputStream);
 			ps.print(data);
-			
+
 			//get result
-	        status = urlc.getResponseCode();
-	        
-	    } 
+			status = urlc.getResponseCode();
+
+		} 
 		catch (IOException e) {
 		}
 		finally {
 			ps.close();
+			try {
+				outputStream.close();
+			} catch (IOException e) {
+				// ignore
+			}
 			urlc.disconnect();
-			
 		}
 		return new HttpReturn(status, "");  
-    }
+	}
 }
 

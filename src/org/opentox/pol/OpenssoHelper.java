@@ -48,6 +48,7 @@ public class OpenssoHelper {
 		InputStreamReader iss = null;
 		BufferedReader br = null;
 		HttpURLConnection urlc = null;
+		InputStream inputStream = null;
 
 		try {
 			data = "username=" + URLEncoder.encode(user,"UTF-8") + "&password=" + URLEncoder.encode(pw,"UTF-8");
@@ -72,15 +73,17 @@ public class OpenssoHelper {
 			String answer = null;
 			int status=0;
 			
-			iss = new InputStreamReader(urlc.getInputStream());
+			inputStream = urlc.getInputStream();
+			iss = new InputStreamReader(inputStream);
 			br = new BufferedReader(iss);
 			answer=BrToString(br);
 			status = urlc.getResponseCode();
 			if (answer != null) {
 				ei = new ErrorInfo(answer, status);
 			}
-			iss.close();
 			br.close();
+			iss.close();
+			inputStream.close();
 			urlc.disconnect();
 		}
 
@@ -95,6 +98,7 @@ public class OpenssoHelper {
 		InputStreamReader iss = null;
 		BufferedReader br = null;
 		HttpURLConnection urlc = null;
+		InputStream inputStream = null;
 
 		try {
 			data = "subjectid=" + URLEncoder.encode(token,"UTF-8");
@@ -118,15 +122,17 @@ public class OpenssoHelper {
 
 			String answer = null;
 			int status=0;
-			iss = new InputStreamReader(urlc.getInputStream());
+			inputStream = urlc.getInputStream();
+			iss = new InputStreamReader(inputStream);
 			br = new BufferedReader(iss);
 			answer=BrToString(br);
 			status = urlc.getResponseCode();
 			if (answer != null) {
 				ei = new ErrorInfo(answer, status);
 			}
-			iss.close();
+			inputStream.close();
 			br.close();
+			iss.close();
 			urlc.disconnect();
 		}
 
@@ -143,6 +149,7 @@ public class OpenssoHelper {
 		InputStreamReader iss = null;
 		BufferedReader br = null;
 		HttpURLConnection urlc = null;
+		InputStream inputStream = null;
 
 		try {
 			data = "realm=" + URLEncoder.encode(realm,"UTF-8") + 
@@ -169,15 +176,17 @@ public class OpenssoHelper {
 
 			String answer = null;
 			int status=0;
-			iss = new InputStreamReader(urlc.getInputStream());
+			inputStream = urlc.getInputStream();
+			iss = new InputStreamReader(inputStream);
 			br = new BufferedReader(iss);
 			answer = BrToString(br);
 			status = urlc.getResponseCode();
 			if (answer != null) {
 				ei = new ErrorInfo(answer, status);
 			}
-			iss.close();
 			br.close();
+			iss.close();
+			inputStream.close();
 			urlc.disconnect();
 		}
 
@@ -193,6 +202,7 @@ public class OpenssoHelper {
 		InputStreamReader iss = null;
 		BufferedReader br = null;
 		HttpURLConnection urlc = null;
+		InputStream inputStream = null;
 		
 		try {
 			data = "policynames=" + URLEncoder.encode(polname,"UTF-8") + 
@@ -219,15 +229,17 @@ public class OpenssoHelper {
 
 			String answer = null;
 			int status=0;
-			iss = new InputStreamReader(urlc.getInputStream());
+			inputStream = urlc.getInputStream();
+			iss = new InputStreamReader(inputStream);
 			br = new BufferedReader(iss);
 			answer = BrToString(br);
 			status = urlc.getResponseCode();
 			if (answer != null) {
 				ei = new ErrorInfo(answer, status);
 			}
-			iss.close();
 			br.close();
+			iss.close();
+			inputStream.close();
 			urlc.disconnect();
 		}
 
@@ -243,6 +255,7 @@ public class OpenssoHelper {
 		InputStreamReader iss = null;
 		BufferedReader br = null;
 		HttpURLConnection urlc = null;
+		InputStream inputStream = null;
 
 		try {
 			data = "policynames=" + URLEncoder.encode(polname,"UTF-8") + 
@@ -269,15 +282,17 @@ public class OpenssoHelper {
 
 			String answer = null;
 			int status=0;
-			iss = new InputStreamReader(urlc.getInputStream());
+			inputStream=urlc.getInputStream();
+			iss = new InputStreamReader(inputStream);
 			br = new BufferedReader(iss);
 			answer = BrToString(br);
 			status = urlc.getResponseCode();
 			if (answer != null) {
 				ei = new ErrorInfo(answer, status);
 			}
-			iss.close();
 			br.close();
+			iss.close();
+			inputStream.close();
 			urlc.disconnect();
 		}
 
@@ -316,11 +331,17 @@ public class OpenssoHelper {
 			while ((line=br.readLine()) != null) {
 				contents += line;
 			}
-			br.close();
 		}
 		catch (IOException e) {
 			System.out.println("OpenssoHelper: " + e.getMessage());
 			e.printStackTrace();
+		}
+		finally {
+			try {
+				br.close();
+			} catch (IOException e) {
+				// ignore
+			}
 		}
 		return contents;
 	}
