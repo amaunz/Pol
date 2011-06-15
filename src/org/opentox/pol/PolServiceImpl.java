@@ -38,6 +38,7 @@ import org.opentox.pol.httpreturn.*;
 //import org.opentox.pol.sqlitedb.*;
 import org.opentox.mysql.*;
 import org.opentox.pol.xml.ParsePolicy;
+import org.opentox.pol.xml.UrlEncoder;
 
 //import java.sql.*;
 
@@ -298,7 +299,9 @@ public class PolServiceImpl implements PolService {
 					if (ei.status == 200) {
 						token=ei.output.substring(ei.output.lastIndexOf("token.id=")+9);
 						System.out.println(token);
-						ErrorInfo c = opensso.createPolicy(sb.toString(), token);
+						String encoded_pol = UrlEncoder.Encode(sb.toString());
+						//System.out.println(encoded_pol);
+						ErrorInfo c = opensso.createPolicy(encoded_pol, token);
 						output = htmlToString(c.output);
 						status=c.status;
 						output_short = GetSsoOutput(output);
