@@ -4,19 +4,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
 import org.opentox.pol.OpenssoHelper;
 
 public class MySQL {
-
+	final static String res_field = "res";
+	final static String user_field = "user";
+	final static String pol_field = "pol";
+	
 	private Connection conn;
 
 	public void open() {
@@ -63,7 +64,7 @@ public class MySQL {
 		Statement stmt = null;
 		try {
 			stmt = conn.createStatement();
-			stmt.executeUpdate("INSERT INTO pol VALUES ('" + pol + "','" + user + "','" + res + "');");
+			stmt.executeUpdate(String.format("INSERT INTO pol VALUES ('%s','%s','%s');",pol,user,res));
 		}
 		catch (SQLException ex){
 			System.out.println("SQLException: " + ex.getMessage());
@@ -86,7 +87,7 @@ public class MySQL {
 		Statement stmt = null;
 		try {
 			stmt = conn.createStatement();
-			String query = "DELETE FROM pol WHERE pol='"+pol+"';";
+			String query = String.format("DELETE FROM pol WHERE pol='%s'",pol);
 			stmt.executeUpdate(query);
 		}
 		catch (SQLException ex){
@@ -112,12 +113,12 @@ public class MySQL {
 		Statement stat = null;
 		try {
 			stat = conn.createStatement();
-			rs = stat.executeQuery("SELECT * FROM pol WHERE pol='"+pol+"';");
+			rs = stat.executeQuery(String.format("SELECT user FROM pol WHERE pol='%s'",pol));
 			while (rs.next()) {
 				//System.out.println("search_user_by_pol: pol = " + rs.getString("pol"y));
 				//System.out.println("search_user_by_pol: user = " + rs.getString("user"));
 				//System.out.println("search_user_by_pol: res = " + rs.getString("res"));
-				resres = rs.getString("user");
+				resres = rs.getString(user_field);
 				break;
 			}
 		} catch (SQLException e) {
@@ -145,7 +146,7 @@ public class MySQL {
 		Statement stat = null;
 		try {
 			stat = conn.createStatement();
-			rs = stat.executeQuery("SELECT * FROM pol WHERE pol='"+pol+"';");   
+			rs = stat.executeQuery(String.format("SELECT pol FROM pol WHERE pol='%s' LIMIT 1",pol));   
 			while (rs.next()) {
 				res = true;
 				break;
@@ -168,6 +169,12 @@ public class MySQL {
 		return(res);
 	}
 
+	/**
+	 * Retrieve policyid, user, and resource , given a policy id
+	 * @param pol
+	 * @return
+	 * @throws Exception
+	 */
 	public List<String> search_pol(String pol) throws Exception {
 		Statement stat = null;
 		ResultSet rs = null;
@@ -175,9 +182,11 @@ public class MySQL {
 
 		try {
 			stat = conn.createStatement();
-			rs = stat.executeQuery("SELECT * FROM pol WHERE pol='"+pol+"';");
+			rs = stat.executeQuery(String.format("SELECT pol,user,res FROM pol WHERE pol='%s'",pol));
 			while (rs.next()) {
-				res.add(rs.getString("pol") + ";" + rs.getString("user") + ";" + rs.getString("res"));
+				res.add(String.format("%s;%s;%s",
+						rs.getString(pol_field),rs.getString(user_field),rs.getString(res_field)
+						));
 			}
 		} catch (SQLException e) {
 			System.out.println("SQLException: " + e.getMessage());
@@ -199,25 +208,31 @@ public class MySQL {
 
 	}
 
+	/**
+	 * Retrieves policy ids, given user name. 
+	 * Strings delimited by \n
+	 * @param user
+	 * @return
+	 */
 	public String search_users_pols(String user) {
-		String res = "";
+		final String polfield = "pol";
+		final String newline = "\n";
+
 		Statement stat = null;
 		ResultSet rs = null;
-		Iterator<String> it = null;
-		HashSet<String> hs = new HashSet<String>();
-
+		StringBuilder b = new StringBuilder();
+		
 		try {
 			stat = conn.createStatement();
-			rs = stat.executeQuery("SELECT * FROM pol WHERE user='"+user+"';");
+			rs = stat.executeQuery(String.format("SELECT pol FROM pol WHERE user='%s'",user));
 			while (rs.next()) {
-				String s = rs.getString("pol");
-				if (s!=null) hs.add(s);
+				String s = rs.getString(polfield);
+				if (s!=null) {
+					b.append(s);
+					b.append(newline);
+				}
 			}
-			it = hs.iterator();
-			while (it.hasNext()) {
-				String s = it.next();
-				if (s != null) res += s + "\n";	
-			}
+
 		} catch (SQLException e) {
 			System.out.println("SQLException: " + e.getMessage());
 			System.out.println("SQLState: " + e.getSQLState());
@@ -233,22 +248,28 @@ public class MySQL {
 				stat = null;
 			}
 		}
-		return res;
+		return b.toString();
 	}
 
+	/**
+	 * Retrieves resource owner (user name), given by resource URI
+	 * @param res
+	 * @return
+	 */
 	public String[] search_res(String res) {
+
 		String[] resres = new String[3];
 		Statement stat = null;
 		ResultSet rs = null;
 
 		try {
 			stat = conn.createStatement();
-			String query = "SELECT * FROM pol WHERE res='"+res+"';";
+			String query = String.format("SELECT res,user FROM pol WHERE res='%s' LIMIT 1",res);
 			rs = stat.executeQuery(query);
 			resres[2]="";
 			while (rs.next()) {
-				resres[0] = rs.getString("res");
-				resres[1] = rs.getString("user");
+				resres[0] = rs.getString(res_field);
+				resres[1] = rs.getString(user_field);
 				break; // Assumes the same user for a resource name in all records
 			}
 
@@ -271,7 +292,9 @@ public class MySQL {
 	}
 
 
-	//	get user who created res and all policy names associated with it
+	/**
+	 * get user who created res and all policy names associated with it
+	 */
 	public String[] search_res_pol(String res) {
 		String[] resres = new String[3];
 		Statement stat = null;
@@ -279,19 +302,22 @@ public class MySQL {
 
 		try {
 			stat = conn.createStatement();
-			String query = "SELECT * FROM pol WHERE res='"+res+"';";
+			String query = String.format("SELECT res,user,pol FROM pol WHERE res='%s'",res);
 			//System.out.println(query);
 			rs = stat.executeQuery(query);
 			int i=0;
+			StringBuilder b = new StringBuilder();
 			resres[2]="";
 			while (rs.next()) {
 				if (i==0) { 
-					resres[0] = rs.getString("res");
-					resres[1] = rs.getString("user");
+					resres[0] = rs.getString(res_field);
+					resres[1] = rs.getString(user_field);
 				}
-				resres[2] += "\n" + rs.getString("pol");
+				b.append("\n");
+				b.append(rs.getString(pol_field));
 				i++;
 			}
+			resres[2] = b.toString();
 
 		} catch (SQLException e) {
 			System.out.println("SQLException: " + e.getMessage());

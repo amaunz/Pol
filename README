@@ -1,0 +1,25 @@
+This is OpenTox Policy service. 
+
+Build by 
+>mvn package
+
+Run by
+>mvn tomcat:run
+
+Or deploy into a servlet container
+
+The following entry should be configured in your .m2/settings.xml 
+
+<!-- Start config -->
+    <profile>
+      <id>policy-test</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+	<openssouser>user</openssouser>
+	<openssopassword>The password</openssopassword>
+	<openssoservice>URI of the The OpenSSO/OpenAM service</openssoservice>
+      </properties>
+    </profile>
+<!-- End config-->
