@@ -25,7 +25,8 @@
 	    <artifactId>xom</artifactId>
 	    <version>1.2.5</version>
 <!-- Exclusion - these jars were not required by the original non-maven version, but included 
-probably because of transitive dependencies -->	    
+probably because of transitive dependencies -->	  
+<!--   
      <exclusions>
         <exclusion>  
     <groupId>xalan</groupId>
@@ -43,7 +44,8 @@ probably because of transitive dependencies -->
       <groupId>javax.xml.bind</groupId>
       <artifactId>jaxb-api</artifactId>        
         </exclusion>
-      </exclusions> 	    
+      </exclusions> 	
+       -->    
 	</dependency>
 	<dependency>
 	    <groupId>org.slf4j</groupId>
@@ -63,7 +65,19 @@ probably because of transitive dependencies -->
 	    <artifactId>c3p0</artifactId>
 	    <version>0.9.1.2</version>
 	</dependency>
-
+<dependency>
+    <groupId>org.dbunit</groupId>
+    <artifactId>dbunit</artifactId>
+    <version>2.4.8</version>
+    <scope>test</scope>
+</dependency>
+<dependency>
+	<groupId>junit</groupId>
+	<artifactId>junit</artifactId>
+	<version>4.8.2</version>
+	<type>jar</type>
+	<scope>test</scope>
+</dependency>
  </dependencies>
  <build>
  
@@ -75,6 +89,10 @@ probably because of transitive dependencies -->
 			<directory>src/main/resources</directory>
 			<filtering>true</filtering>
 		</resource>
+		<resource>
+			<directory>src/test/resources</directory>
+			<filtering>true</filtering>
+		</resource>		
 	</resources>
  	<pluginManagement>
   		<plugins>

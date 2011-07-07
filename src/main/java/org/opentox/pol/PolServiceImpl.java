@@ -34,13 +34,6 @@ import org.opentox.pol.xml.ParsePolicy;
 import org.opentox.pol.xml.Policy;
 
 
-
-/**
- * @author Gabriel Mateescu gabriel@vt.edu
- */
-
-
-
 /**
  * A Singleton class that uses an in-memory map to keep 
  * the pol objects. This way, we maintain the state of the 
@@ -49,17 +42,30 @@ import org.opentox.pol.xml.Policy;
  */
 @Path("/opensso-pol")
 public class PolServiceImpl implements PolService {
-
-	//@Context private javax.servlet.http.HttpServletRequest hsr;
-
-
+	final static String msg_tokenmissing = "[Policy service] Missing token.\n\n";
+	final static String msg_token_expired = "[Policy service] Token could not be resolved to a user id. Token expired?\n\n";
+	final static String msg_dberror = "[Policy service] Exception in mysql backend. %s\n\n";
+	final static String msg_notanowner = "[Policy service] Not the owner of policy '%s' or policy '%s' does not exist.\n\n";
+	final static String msg_ioexception = "[Policy service] IOException %s. Please contact the administrator.\n\n";
+	final static String msg_token_resolved = "[Policy service] Resolved to user: '%s'";
+	final static String msg_malformedXML = "[Policy service] Malformed XML\n\n";
+	final static String msg_createpolicy = "[Policy service] Create Policy '%s'";
+	final static String msg_policyalreadyregistered =  "Resource '%s' already registered by user '%s'.\n\n";
+	final static String msg_invaliduri = "Resource '%s' is not a valid URI.\n\n";
+	final static String msg_existingpolicy = "Policy '%s' already exists.\n\n";
+	final static String msg_maxresources = "Policy '%s' contains more than the current maximum of %d resources. Please consider splitting your policy.";
+	final static String msg_missingxml = "Missing XML file.\n\n";
+	final static String msg_unsupportedencoding = "Unsupported encoding. Please use UTF-8 encoded XML files.\n\n";
+	final static String msg_invalidwildcard = "Resource '%s' has illegal wildcards.\n\n";
+	final static String msg_xmlserializationfailed = "XML serialization failed. %s\n\n%s\n\n";
+	final static String msg_searchingpolicies = "   Searching policies of token user '%s'.";
+	
+	final static String mime_text = "text/plain";
+	
 	private static PolServiceImpl instance = null;
 
 	private PolServiceImpl() {
-		// Prevent instantiation by clients
 	}
-
-
 
 	public synchronized static PolServiceImpl getInstance() {
 		if(instance == null) {
@@ -67,7 +73,9 @@ public class PolServiceImpl implements PolService {
 		}
 		return instance;
 	}
-
+	public void log(String msg) {
+		System.out.print(msg);
+	}
 	/**
 	 * Create a Pol resource to respond to an HTTP request
 	 * 
@@ -111,23 +119,23 @@ public class PolServiceImpl implements PolService {
 		StringBuilder sb = new StringBuilder();
 		StringBuilder sb2 = new StringBuilder();
 
-		System.out.println("\nS: Create pol");
+		log("\nS: Create pol");
 
 		try {
 
 			// Find token user
 			if(subjectId == null) {
-				System.out.println("Missing token.");
-				throw new WebApplicationException(Response.status(400).entity("Missing token.\n\n").type("text/plain").build());
+				log(msg_tokenmissing);
+				throw new WebApplicationException(Response.status(400).entity(msg_tokenmissing).type(mime_text).build());
 			}
 			Rest r = new Rest(); 
 			HttpReturn ret = r.DoIdCall(subjectId);
 			token_user = ret.data;
 			if (token_user == null) {
-				System.out.println("Token could not be resolved to a user id. Token expired?");
-				throw new WebApplicationException(Response.status(400).entity("Token could not be resolved to a user id. Token expired?.\n\n").type("text/plain").build());
+				log(msg_token_expired);
+				throw new WebApplicationException(Response.status(400).entity(msg_token_expired).type(mime_text).build());
 			}
-			System.out.println("Resolved to user: '" + token_user + "'");
+			log(String.format(msg_token_resolved,token_user));
 
 
 			// Read XML
@@ -157,18 +165,20 @@ public class PolServiceImpl implements PolService {
 					is.close();
 				}
 			} 
-			else {       
-				exception=new WebApplicationException(Response.status(400).entity("Missing XML file.\n\n").type("text/plain").build());
+			else {
+
+				exception=new WebApplicationException(Response.status(400).entity(msg_missingxml).type(mime_text).build());
 			}
 		} catch(UnsupportedEncodingException e) {
-			exception=new WebApplicationException(Response.status(400).entity("Unsupport Coding. Please use UTF-8 encoded XML files.\n\n").type("text/plain").build());
+
+			exception=new WebApplicationException(Response.status(400).entity(msg_unsupportedencoding).type(mime_text).build());
 		} catch(IOException e) {
-			exception=new WebApplicationException(Response.status(500).entity("IOException. Please contact administrator.\n\n").type("text/plain").build());
+			exception=new WebApplicationException(Response.status(500).entity(String.format(msg_ioexception, e.getMessage())).type(mime_text).build());
 		}
 		//		finally {
 		if (exception!=null) {
 			temp2.delete();
-			System.out.println(exception.getMessage());
+			log(exception.getMessage());
 			throw exception;
 		}
 		//		}
@@ -182,8 +192,8 @@ public class PolServiceImpl implements PolService {
 			}
 			catch (Exception e) {
 				e.printStackTrace();
-				System.out.println("Malformed XML.");
-				throw new WebApplicationException(Response.status(400).entity("Malformed XML.\n\n").type("text/plain").build());
+				log(msg_malformedXML);
+				throw new WebApplicationException(Response.status(400).entity(msg_malformedXML).type(mime_text).build());
 			}
 			finally {
 				temp2.delete();
@@ -195,7 +205,7 @@ public class PolServiceImpl implements PolService {
 			while(it.hasNext()) {
 				Policy p = it.next();
 				polName=p.getName();
-				System.out.println("Create Policy '" + polName + "'");
+				log(String.format(msg_createpolicy,polName));
 				resNames=p.getResources();
 				// Proceed only for new policy name
 				s.open();
@@ -232,16 +242,19 @@ public class PolServiceImpl implements PolService {
  
 
 			if (!resources_untouched) {
-				System.out.println("Resource '" +  db_resource + "' already registered by user '" + db_user + "'.");		
-				throw new WebApplicationException(Response.status(400).entity("Resource '" +  db_resource + "' already registered by user '" + db_user + "'.\n\n").type("text/plain").build());
+
+				
+				log(String.format(msg_policyalreadyregistered,db_resource, db_user));		
+				throw new WebApplicationException(Response.status(400).entity(String.format(msg_policyalreadyregistered,db_resource, db_user)).type(mime_text).build());
 			}
 			if (!policy_is_new) {
-				System.out.println("Policy '" +  polName + "' already exists.");		
-				throw new WebApplicationException(Response.status(400).entity("Policy '" +  polName + "' already exists.\n\n").type("text/plain").build());
+
+				log(String.format(msg_existingpolicy,polName));		
+				throw new WebApplicationException(Response.status(400).entity(String.format(msg_existingpolicy,polName)).type(mime_text).build());
 			}
 			if (!nr_resources_below_max) {
-				System.out.println("Policy '" +  polName + "' contains more than the current maximum of " + max_nr_resources_per_pol + " resources. Please consider splitting your policy.");		
-				throw new WebApplicationException(Response.status(400).entity("Policy '" +  polName + "' contains more than the current maximum of " + max_nr_resources_per_pol + " resources. Please consider splitting your policy.\n\n").type("text/plain").build());
+				log(String.format(msg_maxresources,polName ,max_nr_resources_per_pol));		
+				throw new WebApplicationException(Response.status(400).entity(String.format(msg_maxresources,polName ,max_nr_resources_per_pol)).type(mime_text).build());
 			}
 
 			// PROCESS REQUEST
@@ -257,7 +270,8 @@ public class PolServiceImpl implements PolService {
 					try {
 						aURL = new URL(resName);
 					} catch (MalformedURLException e) {
-						throw new WebApplicationException(Response.status(400).entity("Resource '" + resName + "' is not a valid URI.\n\n").type("text/plain").build());
+
+						throw new WebApplicationException(Response.status(400).entity(String.format(msg_invaliduri,resName)).type(mime_text).build());
 					}
 					String path = aURL.getPath();
 
@@ -276,7 +290,8 @@ public class PolServiceImpl implements PolService {
 							if (path.contains("/algorithm/JOELIB2/-*-")) { ok=true; }
 						}
 						if (!ok) {
-							throw new WebApplicationException(Response.status(400).entity("Resource '" + resName + "' has illegal wildcards.\n\n").type("text/plain").build());
+
+							throw new WebApplicationException(Response.status(400).entity(String.format(msg_invalidwildcard,resName)).type(mime_text).build());
 						}
 					}
 				}
@@ -294,7 +309,7 @@ public class PolServiceImpl implements PolService {
 				if (ei != null) {
 					if (ei.status == 200) {
 						token=ei.output.substring(ei.output.lastIndexOf("token.id=")+9);
-						System.out.println(token);
+						log(token);
 						ErrorInfo c = opensso.createPolicy(sb.toString(), token);
 						output = htmlToString(c.output);
 						status=c.status;
@@ -303,10 +318,10 @@ public class PolServiceImpl implements PolService {
 				}
 				opensso.doLogout(token);
 			} catch (IOException e) {
-				throw new WebApplicationException(Response.status(500).entity("IOException. Please contact administrator.\n\n").type("text/plain").build());
+				throw new WebApplicationException(Response.status(500).entity(String.format(msg_ioexception, e.getMessage())).type(mime_text).build());
 			}            
 			if (output_short.length()==0 || status != 200) {
-				throw new WebApplicationException(Response.status(400).entity(GetLastRow(output) + "\n\n").type("text/plain").build());            	
+				throw new WebApplicationException(Response.status(400).entity(GetLastRow(output) + "\n\n").type(mime_text).build());            	
 			}
 
 			it = polres.iterator();
@@ -335,14 +350,14 @@ public class PolServiceImpl implements PolService {
 						}
 						catch (Exception de){}
 					}
-					throw new WebApplicationException(Response.status(500).entity("Exception in mysql backend.\n\n").type("text/plain").build());
+					throw new WebApplicationException(Response.status(500).entity(String.format(msg_dberror,e.getMessage())).type(mime_text).build());
 				}
 				finally {
 					s.close();
 				}
 			}
-			System.out.println("E: Create pol");
-			return Response.ok(output_short).type("text/plain").build();			
+			log("E: Create pol");
+			return Response.ok(output_short).type(mime_text).build();			
 		}
 	}
 
@@ -357,13 +372,19 @@ public class PolServiceImpl implements PolService {
 	 */
 	public Response getPolID(@HeaderParam("subjectid") String subjectId, @HeaderParam("id") String id, @HeaderParam("uri") String uri, @HeaderParam("polnames") String polnames)
 	throws WebApplicationException {
-
-		System.out.println("\nS: Get pol ID");
+		
+		
+		//moved upfront - first check if the token is here, before db access
+		if(subjectId == null) {
+			throw new WebApplicationException(Response.status(400).entity(msg_tokenmissing).type(mime_text).build());
+		}
+		
+		log("\nS: Get pol ID\n");
 
 		// If 'id' is *not* set, gather information about my URIs or a specific (but otherwise arbitrary) URI... 
 		if (id == null) {
 			Response r = getPol(subjectId, uri, polnames);
-			System.out.println("E: Get pol ID");
+			log("E: Get pol ID\n");
 			return r;
 		}
 
@@ -376,28 +397,29 @@ public class PolServiceImpl implements PolService {
 		try {
 			s.open();
 			db_user = s.search_user_by_pol(id);
-			s.close();
+			
 		}
 		catch (Exception e) {
-			throw new WebApplicationException(Response.status(500).entity("Exception in mysql backend.\n\n").type("text/plain").build());
+			throw new WebApplicationException(Response.status(500).entity(String.format(msg_dberror,e.getMessage())).type(mime_text).build());
 		}
 		finally {
-			s.close();
+			if (s!=null) s.close();
 		}
-		System.out.println("id: '" + id + "'");
-		System.out.println("db user: '" + db_user + "'");
+		
+		if (db_user == null) { //policy id not found, but better not to reveal this, just say not an owner
+			throw new WebApplicationException(Response.status(401).entity(String.format(msg_notanowner,id,id)).type(mime_text).build());
+		}
+		log("id: '" + id + "'\n");
+		log("db user: '" + db_user + "'\n");
 
 		// Resolve user from token
-		if(subjectId == null) {
-			throw new WebApplicationException(Response.status(400).entity("Missing token.\n\n").type("text/plain").build());
-		}
 		Rest r = new Rest(); 
 		HttpReturn ret = r.DoIdCall(subjectId);
 		token_user = ret.data;
 		if (token_user == null) {
-			throw new WebApplicationException(Response.status(400).entity("Token could not be resolved to a user id. Token expired?.\n\n").type("text/plain").build());
+			throw new WebApplicationException(Response.status(400).entity(msg_token_expired).type(mime_text).build());
 		}
-		System.out.println("token user: '" + token_user + "'");
+		log("token user: '" + token_user + "'");
 
 		// delete entries
 		if (db_user != null && token_user != null && db_user.equals(token_user)) {
@@ -410,7 +432,7 @@ public class PolServiceImpl implements PolService {
 				if (ei != null) {
 					if (ei.status == 200) {
 						token=ei.output.substring(ei.output.lastIndexOf("token.id=")+9);
-						System.out.println(token);
+						log(token);
 						ErrorInfo c = opensso.listPolicy(id, token);
 						output = htmlToString(c.output);
 					}
@@ -419,32 +441,34 @@ public class PolServiceImpl implements PolService {
 				//output = (opensso.listPolicy("/", id)).toString();
 			}
 			catch (IOException e) {
-				System.out.println("PolServiceImpl: " + e.getMessage());
+				log("PolServiceImpl: " + e.getMessage());
 				e.printStackTrace();
 			}
 
 			try {
 				output = output.substring(output.indexOf("<Policies>"),output.length()); // incorporated XML formatting
 			} catch (StringIndexOutOfBoundsException e) {
-				throw new WebApplicationException(Response.status(500).entity("XML serialization failed.\n\n" + output + "\n\n").type("text/plain").build());
+				
+				throw new WebApplicationException(Response.status(500).entity(String.format(msg_xmlserializationfailed,e.getMessage(),output)).type(mime_text).build());
 			}
 
-			System.out.println();
+			log("\n");
 
 			try {
 				output = format(output);
 			} catch (ParsingException e) {
-				throw new WebApplicationException(Response.status(500).entity("XML serialization failed.\n\n").type("text/plain").build());
+				throw new WebApplicationException(Response.status(500).entity(String.format(msg_xmlserializationfailed,e.getMessage(),output)).type(mime_text).build());
 			} catch (IOException e) {
-				throw new WebApplicationException(Response.status(500).entity("XML serialization failed.\n\n").type("text/plain").build());
+				throw new WebApplicationException(Response.status(500).entity(String.format(msg_xmlserializationfailed,e.getMessage(),output)).type(mime_text).build());
 			}
 			//System.out.println(output);	    	
-			System.out.println("E: Get pol ID");
+			log("E: Get pol ID");
 			return Response.ok(output).type("text/xml").build();
 
 		}
 		else {
-			throw new WebApplicationException(Response.status(401).entity("Not the owner of policy '"+id+"' or policy '"+id+"' does not exist.\n\n").type("text/plain").build());
+			
+			throw new WebApplicationException(Response.status(401).entity(String.format(msg_notanowner,id,id)).type(mime_text).build());
 		}
 
 	}
@@ -456,22 +480,22 @@ public class PolServiceImpl implements PolService {
 		String token_user = null;
 		MySQL s = null;
 
-		System.out.println("   S: Get pol (i)");
+		log("   S: Get pol (i)");
 		// Resolve user from token
 		if(subjectId == null) {
-			throw new WebApplicationException(Response.status(400).entity("Missing token.\n\n").type("text/plain").build());
+			throw new WebApplicationException(Response.status(400).entity(msg_tokenmissing).type(mime_text).build());
 		}
 		Rest r = new Rest(); 
 		HttpReturn ret = r.DoIdCall(subjectId);
 		token_user = ret.data;
 		if (token_user == null) {
-			throw new WebApplicationException(Response.status(400).entity("Token could not be resolved to a user id. Token expired?.\n\n").type("text/plain").build());
+			throw new WebApplicationException(Response.status(400).entity(msg_token_expired).type(mime_text).build());
 		}
-		System.out.println("   Token user: '" + token_user + "'");
+		log("   Token user: '" + token_user + "'");
 
 		// URI is given: get owner of URI...
 		if (uri != null) {
-			System.out.println("   Searching owner of uri '" + uri + "'.");
+			log("   Searching owner of uri '" + uri + "'.");
 			// get owner of URI
 			try {
 				s = new MySQL();
@@ -482,7 +506,7 @@ public class PolServiceImpl implements PolService {
 					res = res_arr[1];
 				}
 				else {
-					System.out.println("   => with pol names.");
+					log("   => with pol names.");
 					res_arr = s.search_res_pol(uri);
 					res = res_arr[1];
 					res += res_arr[2];
@@ -490,7 +514,7 @@ public class PolServiceImpl implements PolService {
 
 			}
 			catch (Exception e) {
-				throw new WebApplicationException(Response.status(500).entity("Exception in mysql backend.\n\n").type("text/plain").build());
+				throw new WebApplicationException(Response.status(500).entity(String.format(msg_dberror,e.getMessage())).type(mime_text).build());
 			}
 			finally {
 				s.close();
@@ -501,7 +525,7 @@ public class PolServiceImpl implements PolService {
 		else {
 
 
-			System.out.println("   Searching policies of token user '" + token_user + "'.");			
+			log(String.format(msg_searchingpolicies,token_user));			
 			// get all policies owned by token user
 			try {
 				s = new MySQL();
@@ -509,15 +533,15 @@ public class PolServiceImpl implements PolService {
 				res = s.search_users_pols(token_user);
 			}
 			catch (Exception e) {
-				throw new WebApplicationException(Response.status(500).entity("Exception in mysql backend.\n\n").type("text/plain").build());
+				throw new WebApplicationException(Response.status(500).entity(String.format(msg_dberror,e.getMessage())).type(mime_text).build());
 			}
 			finally {
 				s.close();
 			}
 		}
 
-		System.out.println("   E: Get pol (i)");
-		return Response.ok(res + "\n").type("text/plain").build();
+		log("   E: Get pol (i)");
+		return Response.ok(res + "\n").type(mime_text).build();
 
 	}
 
@@ -551,7 +575,7 @@ public class PolServiceImpl implements PolService {
 			db_user = s.search_user_by_pol(id);
 		}
 		catch (Exception e) {
-			throw new WebApplicationException(Response.status(500).entity("Exception in mysql backend.\n\n").type("text/plain").build());
+			throw new WebApplicationException(Response.status(500).entity(String.format(msg_dberror,e.getMessage())).type(mime_text).build());
 		}
 		finally {
 			s.close();
@@ -561,20 +585,21 @@ public class PolServiceImpl implements PolService {
 
 		// Resolve user from token
 		if(subjectId == null) {
-			throw new WebApplicationException(Response.status(400).entity("Missing token.\n\n").type("text/plain").build());
+			throw new WebApplicationException(Response.status(400).entity(msg_tokenmissing).type(mime_text).build());
 		}
 		Rest r = new Rest(); 
 		HttpReturn ret = r.DoIdCall(subjectId);
 		token_user = ret.data;
 		if (token_user == null) {
-			throw new WebApplicationException(Response.status(400).entity("Token could not be resolved to a user id. Token expired?.\n\n").type("text/plain").build());
+			throw new WebApplicationException(Response.status(400).entity(msg_token_expired).type(mime_text).build());
 		}
-		System.out.println("token user: '" + token_user + "'");
+		log("token user: '" + token_user + "'");
 
 
 		// delete entries
 		if (db_user != null && token_user != null && db_user.equals(token_user)) {
 
+			String msg = "";
 			// delete db entry
 			boolean db_entry_deleted = true;
 			try {
@@ -584,6 +609,7 @@ public class PolServiceImpl implements PolService {
 				s.close();
 			}
 			catch (Exception e) {
+				msg = e.getMessage();
 				db_entry_deleted = false;  	
 			}
 
@@ -606,17 +632,18 @@ public class PolServiceImpl implements PolService {
 					catch (Exception e) {
 					}
 				}
-				System.out.println("E: Del pol");
+				log("E: Del pol");
 				return dr;
 			}
 			else {
-				return Response.status(500).entity("Exception in mysql backend.\n\n").type("text/plain").build();
+				return Response.status(500).entity(String.format(msg_dberror,msg)).type(mime_text).build();
 			}
 
 		}
 
 		else {
-			throw new WebApplicationException(Response.status(401).entity("Not the owner of policy '"+id+"' or policy '"+id+"' does not exist.\n\n").type("text/plain").build());
+			throw new WebApplicationException(Response.status(401).entity(
+					String.format(msg_notanowner,id,id)).type(mime_text).build());
 		}
 
 	}
@@ -640,7 +667,7 @@ public class PolServiceImpl implements PolService {
 			if (ei != null) {
 				if (ei.status == 200) {
 					token=ei.output.substring(ei.output.lastIndexOf("token.id=")+9);
-					System.out.println(token);
+					log(token);
 					ErrorInfo c = opensso.deletePolicy(id, token);
 					output = htmlToString(c.output);
 					status = c.status;
@@ -648,7 +675,7 @@ public class PolServiceImpl implements PolService {
 			}
 			opensso.doLogout(token);
 		} catch (IOException e1) {
-			System.out.println("PolServiceImpl: " + e1.getMessage());
+			log(getClass().getName() + ": " + e1.getMessage());
 			e1.printStackTrace();
 		}
 
@@ -656,13 +683,13 @@ public class PolServiceImpl implements PolService {
 		try {
 			output_short = GetSsoOutput(output);
 		} catch (IOException e) {
-			throw new WebApplicationException(Response.status(500).entity("IOException. Please contact administrator.\n\n").type("text/plain").build());
+			throw new WebApplicationException(Response.status(500).entity(String.format(msg_ioexception, e.getMessage())).type(mime_text).build());
 		}  
 		if (output_short.length()==0) {
-			throw new WebApplicationException(Response.status(400).entity(GetLastRow(output) + "\n\n").type("text/plain").build());            	
+			throw new WebApplicationException(Response.status(400).entity(GetLastRow(output) + "\n\n").type(mime_text).build());            	
 		}
-		if (status == 200) return Response.ok(output_short).type("text/plain").build();
-		else return Response.serverError().type("text/plain").build();
+		if (status == 200) return Response.ok(output_short).type(mime_text).build();
+		else return Response.serverError().type(mime_text).build();
 	}
 
 
@@ -715,7 +742,7 @@ public class PolServiceImpl implements PolService {
 		try {
 			parser.parse(in);
 		} catch (IOException e) {
-			System.out.println("OpenssoHelper: " + e.getMessage());
+			log("OpenssoHelper: " + e.getMessage());
 			e.printStackTrace();
 		}
 		in.close();
