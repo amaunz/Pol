@@ -17,8 +17,9 @@ public class OpenssoHelper {
 	private String pw = "";
 	Rest r = null;
 
-	public OpenssoHelper(){
+	public OpenssoHelper() throws RestException {
 		r = new Rest();
+		//isn't this config already read?
 		InputStream fis = null;
 		String propfile = "org/opentox/pol/admin.properties";
 		fis = OpenssoHelper.class.getClassLoader().getResourceAsStream(propfile);
@@ -29,7 +30,7 @@ public class OpenssoHelper {
 			pw = config.getProperty("pw");
 			url = config.getProperty("host");
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new RestException(500,e);
 		}
 		finally {
 			try {
@@ -41,7 +42,7 @@ public class OpenssoHelper {
 	}
 
 
-	public ErrorInfo doLogin() throws IOException {
+	public ErrorInfo doLogin() throws IOException, RestException {
 
 		String data = null;
 		ErrorInfo ei = null;
@@ -91,7 +92,7 @@ public class OpenssoHelper {
 
 	}
 	
-	public ErrorInfo doLogout(String token) throws IOException {
+	public ErrorInfo doLogout(String token) throws IOException, RestException {
 
 		String data = null;
 		ErrorInfo ei = null;
@@ -141,7 +142,7 @@ public class OpenssoHelper {
 	}
 
 
-	public ErrorInfo createPolicy(String xml, String token) throws IOException {
+	public ErrorInfo createPolicy(String xml, String token) throws IOException, RestException {
 
 		String realm="/";
 		String data = null;
@@ -194,7 +195,7 @@ public class OpenssoHelper {
 
 	}
 
-	public ErrorInfo deletePolicy(String polname, String token) throws IOException {
+	public ErrorInfo deletePolicy(String polname, String token) throws IOException, RestException {
 
 		String realm="/";
 		String data = null;
@@ -247,7 +248,7 @@ public class OpenssoHelper {
 
 	}
 
-	public ErrorInfo listPolicy(String polname, String token) throws IOException {
+	public ErrorInfo listPolicy(String polname, String token) throws IOException , RestException {
 
 		String realm="/";
 		String data = null;

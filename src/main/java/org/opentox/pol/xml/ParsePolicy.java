@@ -17,7 +17,6 @@ public class ParsePolicy {
 
 
 	public ParsePolicy(){
-		//create a list to hold the employee objects
 		myPols = new ArrayList<Policy>();
 	}
 
@@ -52,8 +51,6 @@ public class ParsePolicy {
 
 
 	/**
-	 * I take an employee element and read the values in, create
-	 * an Employee object and return it
 	 * @param empEl
 	 * @return
 	 */
@@ -73,29 +70,5 @@ public class ParsePolicy {
 		return p;
 	}
 
-
-
-
-	
-	/**
-	 * Iterate through the list and print the 
-	 * content to console
-	 */
-//	private void printData(){
-//		Iterator it = myPols.iterator();
-//		while(it.hasNext()) {
-//			System.out.println(it.next().toString());
-//		}
-//	}
-
-/*
-	public static void main(String[] args){
-		//create an instance
-		ParsePolicy pp = new ParsePolicy();
-		
-		//call run example
-		pp.runExample();
-	}
-*/
 
 }

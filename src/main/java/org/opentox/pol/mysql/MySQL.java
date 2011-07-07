@@ -12,8 +12,10 @@ import java.util.List;
 import java.util.Properties;
 
 import org.opentox.pol.OpenssoHelper;
+import org.opentox.pol.RestException;
 
 public class MySQL {
+	final static String msg_dberror = "[Policy service] Exception in mysql backend. %s\n\n";
 	final static String res_field = "res";
 	final static String user_field = "user";
 	final static String pol_field = "pol";
@@ -22,18 +24,19 @@ public class MySQL {
 	
 	
 
-	public void open() {
+	public void open() throws DbException , RestException {
 		try {
 			InputStream fis = null;
 			String pw = "";
 			String propfile = "org/opentox/pol/admin.properties";
 			fis = OpenssoHelper.class.getClassLoader().getResourceAsStream(propfile);
+			if (fis==null) throw new RestException(500,"Cant't load "+propfile);
 			Properties config = new Properties();
 			try {
 				config.load(fis);
 				pw = config.getProperty("pw");
 			} catch (IOException e) {
-				e.printStackTrace();
+				throw new RestException(500,e);
 			}
 			finally {
 				try {
@@ -44,10 +47,7 @@ public class MySQL {
 			}
 			conn = getConnection("root", pw);		   
 		} catch (SQLException e) {
-			// handle any errors
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
+			throw new DbException(String.format("SQLException: %s\nSQLState: %s\nVendorError: %d", e.getMessage(),e.getSQLState(),e.getErrorCode()));
 		} 
 	}
 	
@@ -65,16 +65,14 @@ public class MySQL {
 		}
 	}
 
-	public void add(String pol, String user, String res) {
+	public void add(String pol, String user, String res) throws DbException  {
 		Statement stmt = null;
 		try {
 			stmt = conn.createStatement();
-			stmt.executeUpdate(String.format("INSERT INTO pol VALUES ('%s','%s','%s');",pol,user,res));
+			stmt.executeUpdate(String.format("INSERT INTO pol VALUES ('%s','%s','%s',null);",pol,user,res));
 		}
-		catch (SQLException ex){
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
+		catch (SQLException e){
+			throw new DbException(String.format("SQLException: %s\nSQLState: %s\nVendorError: %d", e.getMessage(),e.getSQLState(),e.getErrorCode()));
 		}
 		finally {
 			if (stmt != null) {
@@ -88,17 +86,15 @@ public class MySQL {
 	}
 
 
-	public void delete_pol(String pol) {
+	public void delete_pol(String pol) throws DbException {
 		Statement stmt = null;
 		try {
 			stmt = conn.createStatement();
 			String query = String.format("DELETE FROM pol WHERE pol='%s'",pol);
 			stmt.executeUpdate(query);
 		}
-		catch (SQLException ex){
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
+		catch (SQLException e){
+			throw new DbException(String.format("SQLException: %s\nSQLState: %s\nVendorError: %d", e.getMessage(),e.getSQLState(),e.getErrorCode()));
 		}
 		finally {
 			if (stmt != null) {
@@ -112,7 +108,7 @@ public class MySQL {
 	}
 
 
-	public String search_user_by_pol(String pol) {
+	public String search_user_by_pol(String pol) throws DbException {
 		String resres = null;
 		ResultSet rs = null;
 		Statement stat = null;
@@ -120,21 +116,16 @@ public class MySQL {
 			stat = conn.createStatement();
 			rs = stat.executeQuery(String.format("SELECT user FROM pol WHERE pol='%s'",pol));
 			while (rs.next()) {
-				//System.out.println("search_user_by_pol: pol = " + rs.getString("pol"y));
-				//System.out.println("search_user_by_pol: user = " + rs.getString("user"));
-				//System.out.println("search_user_by_pol: res = " + rs.getString("res"));
 				resres = rs.getString(user_field);
 				break;
 			}
 		} catch (SQLException e) {
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
+			throw new DbException(String.format("SQLException: %s\nSQLState: %s\nVendorError: %d", e.getMessage(),e.getSQLState(),e.getErrorCode()));
 		}
 		finally {
 			try {
-				rs.close();
-				stat.close();
+				if (rs != null) rs.close();
+				if (stat !=null) stat.close();
 			} catch (SQLException sqlEx) { } // ignore
 			finally {
 				rs = null;
@@ -145,7 +136,7 @@ public class MySQL {
 	}
 
 	// returns true if policy name exists in DB
-	public boolean search_pol_name(String pol)  {
+	public boolean search_pol_name(String pol) throws DbException {
 		boolean res = false;
 		ResultSet rs = null;
 		Statement stat = null;
@@ -157,9 +148,7 @@ public class MySQL {
 				break;
 			}
 		} catch (SQLException e) {
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
+			throw new DbException(String.format("SQLException: %s\nSQLState: %s\nVendorError: %d", e.getMessage(),e.getSQLState(),e.getErrorCode()));
 		}
 		finally {
 			try {
@@ -194,9 +183,7 @@ public class MySQL {
 						));
 			}
 		} catch (SQLException e) {
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
+			throw new DbException(String.format("SQLException: %s\nSQLState: %s\nVendorError: %d", e.getMessage(),e.getSQLState(),e.getErrorCode()));
 		}
 		finally {
 			try {
@@ -219,7 +206,7 @@ public class MySQL {
 	 * @param user
 	 * @return
 	 */
-	public String search_users_pols(String user) {
+	public String search_users_pols(String user) throws DbException {
 		final String polfield = "pol";
 		final String newline = "\n";
 
@@ -239,9 +226,7 @@ public class MySQL {
 			}
 
 		} catch (SQLException e) {
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
+			throw new DbException(String.format("SQLException: %s\nSQLState: %s\nVendorError: %d", e.getMessage(),e.getSQLState(),e.getErrorCode()));
 		}
 		finally {
 			try {
@@ -261,7 +246,7 @@ public class MySQL {
 	 * @param res
 	 * @return
 	 */
-	public String[] search_res(String res) {
+	public String[] search_res(String res) throws DbException {
 
 		String[] resres = new String[3];
 		Statement stat = null;
@@ -279,9 +264,7 @@ public class MySQL {
 			}
 
 		} catch (SQLException e) {
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
+			throw new DbException(String.format("SQLException: %s\nSQLState: %s\nVendorError: %d", e.getMessage(),e.getSQLState(),e.getErrorCode()));
 		}
 		finally {
 			try {
@@ -300,7 +283,7 @@ public class MySQL {
 	/**
 	 * get user who created res and all policy names associated with it
 	 */
-	public String[] search_res_pol(String res) {
+	public String[] search_res_pol(String res) throws DbException {
 		String[] resres = new String[3];
 		Statement stat = null;
 		ResultSet rs = null;
@@ -325,9 +308,7 @@ public class MySQL {
 			resres[2] = b.toString();
 
 		} catch (SQLException e) {
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
+			throw new DbException(String.format("SQLException: %s\nSQLState: %s\nVendorError: %d", e.getMessage(),e.getSQLState(),e.getErrorCode()));
 		}
 		finally {
 			try {
@@ -341,5 +322,77 @@ public class MySQL {
 		}
 		return resres;
 	}
+	
+	//added from {@link PolServiceImpl}
+	
+	/**
+	 * 
+	 * @param id policy id
+	 * @return username of the owner
+	 * @throws Exception
+	 */
+	public String getDbUser(String id) throws DbException {
+		
+		String db_user = null;
+		// Get user who created policy "id"
+		try {
+			open();
+			db_user = search_user_by_pol(id);
+		} catch (Exception e) {
+			throw new DbException(String.format(msg_dberror,e.getMessage()),e);
+		}
+		finally {
+			close();
+		}
+		return db_user;
+	}
+	
+	
 
+	public String getUriOwner(String uri,String polnames) throws DbException {
+		StringBuilder res = new StringBuilder();
+		try {
+			open();
+			String[] res_arr;
+			if (polnames == null) {
+				res_arr = search_res(uri);
+				res.append(res_arr[1]);
+			}
+			else {
+				//log("   => with pol names.");
+				res_arr = search_res_pol(uri);
+				res.append(res_arr[1]);
+				res.append(res_arr[2]);
+			}
+
+		}
+		catch (Exception e) {
+			throw new DbException(String.format(msg_dberror,e.getMessage()),e);
+		}
+		finally {
+			close();
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * get all policies owned by token user
+	 * @param token_user
+	 * @return
+	 * @throws DbException
+	 */
+	public String getPoliciesByUser(String token_user) throws DbException {
+		
+		try {
+			open();
+			return search_users_pols(token_user);
+		}
+		catch (Exception e) {
+			throw new DbException(String.format(msg_dberror,e.getMessage()));
+		}
+		finally {
+			try {close();} catch (Exception x) {}
+		}
+	}
+	
 }

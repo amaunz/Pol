@@ -107,7 +107,6 @@ public interface PolService {
 	 */
 	@DELETE
 	public Response deletePol(@HeaderParam("subjectid") String subjectId, @HeaderParam("id") String id);
-	
-	abstract Response deletePolInternal(String id);
+
 	
 }
