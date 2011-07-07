@@ -69,7 +69,7 @@ public class MySQL {
 		Statement stmt = null;
 		try {
 			stmt = conn.createStatement();
-			stmt.executeUpdate(String.format("INSERT INTO pol VALUES ('%s','%s','%s',null);",pol,user,res));
+			stmt.executeUpdate(String.format("INSERT INTO pol VALUES ('%s','%s','%s',null,null);",pol,user,res));
 		}
 		catch (SQLException e){
 			throw new DbException(String.format("SQLException: %s\nSQLState: %s\nVendorError: %d", e.getMessage(),e.getSQLState(),e.getErrorCode()));
