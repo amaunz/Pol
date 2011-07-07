@@ -12,32 +12,58 @@
     <groupId>org.apache.wink</groupId>
     <artifactId>wink-server</artifactId>
     <version>1.0-incubating</version>
+
 </dependency>
 <dependency>
     <groupId>org.apache.wink</groupId>
     <artifactId>wink-common</artifactId>
     <version>1.0-incubating</version>
+    
 </dependency>
 	<dependency>
 	    <groupId>xom</groupId>
 	    <artifactId>xom</artifactId>
 	    <version>1.2.5</version>
+<!-- Exclusion - these jars were not required by the original non-maven version, but included 
+probably because of transitive dependencies -->	    
+     <exclusions>
+        <exclusion>  
+    <groupId>xalan</groupId>
+    <artifactId>xalan</artifactId>
+        </exclusion>
+        <exclusion>
+  <groupId>xerces</groupId>
+  <artifactId>xercesImpl</artifactId>
+        </exclusion>
+        <exclusion>
+    <groupId>xml-apis</groupId>
+    <artifactId>xml-apis</artifactId>        
+        </exclusion>
+        <exclusion>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>        
+        </exclusion>
+      </exclusions> 	    
 	</dependency>
 	<dependency>
 	    <groupId>org.slf4j</groupId>
 	    <artifactId>slf4j-api</artifactId>
 	    <version>1.5.8</version>
+    
 	</dependency>
 <dependency>
     <groupId>mysql</groupId>
     <artifactId>mysql-connector-java</artifactId>
     <version>5.1.16</version>
+   
 </dependency>	
+
 	<dependency>
 	    <groupId>c3p0</groupId>
 	    <artifactId>c3p0</artifactId>
 	    <version>0.9.1.2</version>
 	</dependency>
+
  </dependencies>
  <build>
  

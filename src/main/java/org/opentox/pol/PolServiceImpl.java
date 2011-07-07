@@ -1,46 +1,43 @@
 package org.opentox.pol;
 
-/**
- * @author Gabriel Mateescu gabriel@vt.edu
- */
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-
-//
-// Annotations 
-//
-
-// Designate this class as a JAX-RS resource/service
 import javax.ws.rs.HeaderParam;
-import nu.xom.*;
-
-import java.net.*;
-import java.io.*;
-
 import javax.ws.rs.Path;
-//import javax.ws.rs.core.Response.Status;
-
-import java.util.*;
-//import java.net.MalformedURLException;
-//import java.net.URL;
-//import java.net.URLEncoder;
-
-
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-// Exceptions
-import javax.ws.rs.WebApplicationException;
+import nu.xom.Builder;
+import nu.xom.Document;
+import nu.xom.ParsingException;
+import nu.xom.Serializer;
 
-// Utilities
-import org.opentox.pol.xml.*;
-import org.opentox.pol.httpreturn.*;
-//import org.opentox.pol.sqlitedb.*;
-import org.opentox.mysql.*;
+import org.opentox.pol.httpreturn.HttpReturn;
+import org.opentox.pol.mysql.MySQL;
 import org.opentox.pol.xml.ParsePolicy;
+import org.opentox.pol.xml.Policy;
 
-//import java.sql.*;
 
+
+/**
+ * @author Gabriel Mateescu gabriel@vt.edu
+ */
 
 
 

@@ -1,4 +1,4 @@
-package org.opentox.mysql;
+package org.opentox.pol.mysql;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +19,8 @@ public class MySQL {
 	final static String pol_field = "pol";
 	
 	private Connection conn;
+	
+	
 
 	public void open() {
 		try {
@@ -40,8 +42,7 @@ public class MySQL {
 					// ignore
 				}
 			}
-			conn = DriverManager.getConnection("jdbc:mysql://localhost/Pol?" +
-					"user=root&password=" + pw);		   
+			conn = getConnection("root", pw);		   
 		} catch (SQLException e) {
 			// handle any errors
 			System.out.println("SQLException: " + e.getMessage());
@@ -49,10 +50,14 @@ public class MySQL {
 			System.out.println("VendorError: " + e.getErrorCode());
 		} 
 	}
+	
+	protected Connection getConnection(String user,String pw) throws SQLException  {
+		return DriverManager.getConnection(String.format("jdbc:mysql://localhost/Pol?user=%s&password=%s",user,pw));
+	}
 
 	public void close() {
 		try {
-			conn.close();
+			if (conn != null) conn.close();
 		} catch (SQLException e) {
 			System.out.println("SQLException: " + e.getMessage());
 			System.out.println("SQLState: " + e.getSQLState());
