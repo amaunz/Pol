@@ -2,11 +2,45 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opentox</groupId>
   <artifactId>Pol</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.0.3-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>Policy service</name>
-  <description>OpenTox policy service</description>
-  
+  <description>OpenTox policy service
+Forked from  https://github.com/amaunz/Pol</description>
+   <repositories>
+
+  	 <repository>
+        <id>ambit-plovdiv</id>
+        <url>http://ambit.uni-plovdiv.bg:8083/nexus/content/repositories/thirdparty</url>
+        <snapshots>
+  			<enabled>false</enabled>
+  		</snapshots>
+    </repository>
+  	 <repository>
+        <id>ambit-plovdiv-releases</id>
+        <url>http://ambit.uni-plovdiv.bg:8083/nexus/content/repositories/releases</url>
+        <snapshots>
+  			<enabled>false</enabled>
+  		</snapshots>
+    </repository>
+       <repository>
+        <id>ambit-plovdiv-snapshots</id>
+        <url>http://ambit.uni-plovdiv.bg:8083/nexus/content/repositories/snapshots</url>
+        <snapshots>
+                        <enabled>true</enabled>
+                </snapshots>
+    </repository>
+
+  	<repository>
+  		<id>mvnrepository</id>
+  		<name>mvnrepository</name>
+  		<url>http://mvnrepository.com/</url>
+  		<snapshots>
+  			<enabled>false</enabled>
+  		</snapshots>
+  	</repository>
+
+  </repositories>
  <dependencies>
 <dependency>
     <groupId>org.apache.wink</groupId>
@@ -60,11 +94,6 @@ probably because of transitive dependencies -->
    
 </dependency>	
 
-	<dependency>
-	    <groupId>c3p0</groupId>
-	    <artifactId>c3p0</artifactId>
-	    <version>0.9.1.2</version>
-	</dependency>
 <dependency>
     <groupId>org.dbunit</groupId>
     <artifactId>dbunit</artifactId>
@@ -78,7 +107,39 @@ probably because of transitive dependencies -->
 	<type>jar</type>
 	<scope>test</scope>
 </dependency>
+<dependency>
+	<groupId>net.idea</groupId>
+	<artifactId>modbcum-c</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<type>jar</type>
+	<scope>compile</scope>
+</dependency>
  </dependencies>
+ <inceptionYear>2010</inceptionYear>
+ <developers>
+ 	<developer>
+ 		<id>amaunz</id>
+ 		<name>Andreas Maunz</name>
+ 		<url>https://github.com/amaunz</url>
+ 	</developer>
+ 	<developer>
+ 		<id>ngn</id>
+ 		<name>Nina Jeliazkova</name>
+ 		<url>https://github.com/vedina</url>
+ 		<organization>IdeaConsult Ltd.</organization>
+ 		<organizationUrl>www.ideaconsult.net</organizationUrl>
+ 		<timezone>CEST</timezone>
+ 	</developer>
+ </developers>
+ <scm>
+ 	<connection>scm:git:https://vedina@github.com/vedina/Pol.git</connection>
+ 	<developerConnection>scm:git:git@github.com:vedina/Pol.git</developerConnection>
+ 	<url>scm:git:git@github.com:vedina/Pol.git</url>
+ </scm>
+ <organization>
+ 	<name>OpenTox project</name>
+ 	<url>http://www.opentox.org</url>
+ </organization>
  <build>
  
 	<filters>
@@ -117,6 +178,21 @@ probably because of transitive dependencies -->
 		</plugins>
 	</pluginManagement>	
  </build>
+ <profiles>
+ <!-- 
+     <profile>
+      <id>OpenTox</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+	<openssouser>user</openssouser>
+	<openssopassword>The password</openssopassword>
+	<openssoservice>URI of the The OpenSSO/OpenAM service</openssoservice>
+     </properties>
+    </profile>
+     -->
+ </profiles>
    <properties>
   	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>

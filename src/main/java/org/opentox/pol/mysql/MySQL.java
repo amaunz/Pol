@@ -3,13 +3,14 @@ package org.opentox.pol.mysql;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import net.idea.modbcum.c.DatasourceFactory;
 
 import org.opentox.pol.OpenssoHelper;
 import org.opentox.pol.RestException;
@@ -46,13 +47,19 @@ public class MySQL {
 				}
 			}
 			conn = getConnection("root", pw);		   
+			
 		} catch (SQLException e) {
 			throw new DbException(String.format("SQLException: %s\nSQLState: %s\nVendorError: %d", e.getMessage(),e.getSQLState(),e.getErrorCode()));
-		} 
+		} catch (Exception x) {
+			throw new DbException(x.getMessage(),x);
+		}
+
 	}
 	
-	protected Connection getConnection(String user,String pw) throws SQLException  {
-		return DriverManager.getConnection(String.format("jdbc:mysql://localhost/Pol?user=%s&password=%s",user,pw));
+	protected Connection getConnection(String user,String pw) throws Exception  {
+		String uri = String.format("jdbc:mysql://localhost/Pol?user=%s&password=%s",user,pw);
+		return DatasourceFactory.getConnection(uri);
+		//return DriverManager.getConnection(String.format("jdbc:mysql://localhost/Pol?user=%s&password=%s",user,pw));
 	}
 
 	public void close() {
