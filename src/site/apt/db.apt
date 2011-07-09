@@ -1,0 +1,32 @@
+ -----
+ OpenTox Policy service
+ -----
+ Background
+ -----
+ July 2011
+
+OpenTox Policy service 
+~~~~~~~  
+   
+* MySQL Database
+
+  * Make sure {{{http://mysql.com}MySQL}} server is installed and running.
+
+  * Create the 'pol' database and the policy table.
+  
+-------------
+CREATE DATABASE pol;
+
+CREATE TABLE  `pol` (
+  `pol` varchar(4096) DEFAULT NULL,
+  `user` varchar(255) DEFAULT NULL,
+  `res` varchar(4096) DEFAULT NULL,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`),
+  KEY `index_pol` (`pol`(767)) USING BTREE,
+  KEY `index_user` (`user`) USING BTREE,
+  KEY `index_res` (`res`(767)) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=ascii;
+
+-------------
