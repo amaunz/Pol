@@ -1,6 +1,7 @@
 package org.opentox.pol;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -47,14 +48,15 @@ public class Rest {
 	public void Send(HttpURLConnection urlc, String data) throws RestException {
 		urlc.setDoOutput(true);
 		urlc.setAllowUserInteraction(false);
-		PrintStream ps = null;
+		DataOutputStream ps = null;
 		OutputStream outputStream = null;
 		int code = -1;
 		try {
 			outputStream = urlc.getOutputStream();
-			ps = new PrintStream(outputStream);
-			ps.print(data);
-			outputStream.flush();
+		      
+			ps = new DataOutputStream(outputStream);
+			ps.writeBytes(data);
+			ps.flush();
 			if (urlc.getResponseCode()!=200)
 				throw new RestException(code,urlc.getResponseMessage());
 		}
@@ -67,8 +69,9 @@ public class Rest {
 			throw new RestException(code,e);
 		}
 		finally {
-			if (ps!= null) ps.close();
+			
 			try {
+				if (ps!= null) ps.close();
 				if (outputStream!=null) outputStream.close();
 			} catch (IOException e) {
 				// ignore
