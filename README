@@ -43,8 +43,8 @@ Edit the following file:
 
 # Start admin.properties
 # Admin account that was chosen at installation of OpenAM. Used to connect to localhost only.
-user=[OPENSSO ADMIN USER]
-pw=[YOUR OPENSSO PASSWORD]
+user=[OPENSSO/OPENAM ADMIN USER]
+pw=[YOUR OPENSSO/OPENAM PASSWORD]
 # Give the base URI of the deployed OpenAM service here, e.g. http://myhost.mydomain:8180/opensso
-host=[OPENAM URI]
+host=[OPENSSO/OPENAM URI]
 # End admin.properties
