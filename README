@@ -8,6 +8,7 @@ Run by
 
 Or deploy into a servlet container
 
+1) Before compiling
 The following entry should be configured in your .m2/settings.xml 
 
 <!-- Start config -->
@@ -23,3 +24,27 @@ The following entry should be configured in your .m2/settings.xml
       </properties>
     </profile>
 <!-- End config-->
+
+2) Before deployment
+
+2a) MySQL
+The Policy service requires MySQL and existing 'pol' database :
+
+CREATE DATABASE pol;
+
+Create database table(s) as in https://github.com/vedina/Pol/blob/master/src/main/resources/org/opentox/pol/db.sql
+
+2b) Configuration
+If the Pol.war was not compiled with the correct settings, as described in 1), these could be changed after deployment:
+
+Edit the following file:
+
+{tomcat}/webapps/Pol/WEB-INF/classes/org/opentox/pol/admin.properties 
+
+# Start admin.properties
+# Admin account that was chosen at installation of OpenAM. Used to connect to localhost only.
+user=[OPENSSO ADMIN USER]
+pw=[YOUR OPENSSO PASSWORD]
+# Give the base URI of the deployed OpenAM service here, e.g. http://myhost.mydomain:8180/opensso
+host=[OPENAM URI]
+# End admin.properties
