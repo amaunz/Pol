@@ -232,19 +232,19 @@ probably because of transitive dependencies -->
     </mailingList>
     </mailingLists>
  <profiles>
- <!-- 
+
      <profile>
-      <id>OpenTox</id>
+      <id>opentox</id>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
       <properties>
-	<openssouser>user</openssouser>
-	<openssopassword>The password</openssopassword>
-	<openssoservice>URI of the The OpenSSO/OpenAM service</openssoservice>
+	<openssouser>amadmin</openssouser>
+	<openssopassword>[Replace with amadmin/mysql]</openssopassword>
+	<openssoservice>[Replace with URI of the The OpenSSO/OpenAM service]</openssoservice>
      </properties>
     </profile>
-     -->
+
  </profiles>
    <properties>
   	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
