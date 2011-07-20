@@ -22,7 +22,7 @@ This is OpenTox Policy service.
 >mvn package
 
 The output looks like:
-<pre>
+
 [INFO] Scanning for projects...
 [INFO] ------------------------------------------------------------------------
 [INFO] Building Policy service
@@ -32,17 +32,7 @@ The output looks like:
 [INFO] Using 'UTF-8' encoding to copy filtered resources.
 [INFO] Copying 2 resources
 [INFO] Copying 1 resource
-[INFO] Repository 'ambit-plovdiv-snapshots' will be blacklisted
-[INFO] [compiler:compile {execution: default-compile}]
-[INFO] Compiling 17 source files to {your-dir}/Pol/target/classes
-[INFO] [resources:testResources {execution: default-testResources}]
-[INFO] Using 'UTF-8' encoding to copy filtered resources.
-[INFO] Copying 1 resource
-[INFO] [compiler:testCompile {execution: default-testCompile}]
-[INFO] No sources to compile
-[INFO] [surefire:test {execution: default-test}]
-[INFO] Tests are skipped.
-[INFO] [war:war {execution: default-war}]
+[....
 [INFO] Packaging webapp
 [INFO] Assembling webapp[Pol] in [{your-dir}/Pol-0.0.3-SNAPSHOT]
 [INFO] Processing war project
@@ -56,8 +46,6 @@ The output looks like:
 [INFO] Finished at: Wed Jul 20 12:22:19 EEST 2011
 [INFO] Final Memory: 19M/220M
 [INFO] ------------------------------------------------------------------------
-
-</pre>
 
 The .war file will be in the target folder. 
 
