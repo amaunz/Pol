@@ -298,7 +298,6 @@ public class MySQL {
 		try {
 			stat = conn.createStatement();
 			String query = String.format("SELECT res,user,pol FROM pol WHERE res='%s'",res);
-			//System.out.println(query);
 			rs = stat.executeQuery(query);
 			int i=0;
 			StringBuilder b = new StringBuilder();

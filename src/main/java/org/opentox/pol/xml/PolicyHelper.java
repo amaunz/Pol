@@ -87,7 +87,6 @@ public class PolicyHelper {
 			if (ei != null) {
 				if (ei.status == 200) {
 					token=ei.output.substring(ei.output.lastIndexOf("token.id=")+9);
-					log(token);
 					ErrorInfo c = opensso.deletePolicy(id, token);
 					output = htmlToString(c.output);
 					status = c.status;

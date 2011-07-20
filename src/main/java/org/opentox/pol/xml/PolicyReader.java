@@ -54,7 +54,6 @@ public class PolicyReader extends PolicyHelper {
 				if (ei != null) {
 					if (ei.status == 200) {
 						token=ei.output.substring(ei.output.lastIndexOf("token.id=")+9);
-						log(token);
 						ErrorInfo c = opensso.listPolicy(id, token);
 						output = htmlToString(c.output);
 					}
@@ -80,7 +79,7 @@ public class PolicyReader extends PolicyHelper {
 			} catch (IOException e) {
 				throw new RestException(500,String.format(msg_xmlserializationfailed,e.getMessage(),output));
 			}
-			//System.out.println(output);	    	
+  	
 			log("E: Get pol ID");
 			return output;
 		}

@@ -230,7 +230,6 @@ public class PolicyCreator extends PolicyHelper {
 				if (ei != null) {
 					if (ei.status == 200) {
 						token=ei.output.substring(ei.output.lastIndexOf("token.id=")+9);
-						log(token);
 						ErrorInfo c = opensso.createPolicy(sb.toString(), token);
 						output = htmlToString(c.output);
 						status=c.status;
