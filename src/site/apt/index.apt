@@ -1,0 +1,20 @@
+ -----
+ OpenTox Policy service
+ -----
+ Background
+ -----
+ July 2011
+
+OpenTox Policy service
+~~~~~~~  
+   
+     Forked from  {{{https://github.com/amaunz/Pol}https://github.com/amaunz/Pol}}. 
+     
+     Refactored as maven project, introduced several performance improvements.
+  
+   
+   * {{{compile.html} Compile}} 
+   
+   * {{{db.html} Configure}}
+   
+   * {{{install.html} Install}} 

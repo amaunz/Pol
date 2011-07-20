@@ -1,0 +1,13 @@
+ -----
+ OpenTox Policy service
+ -----
+ Background
+ -----
+ July 2011
+
+OpenTox Policy service
+~~~~~~~  
+   
+   * Install {{{http://tomcat.apache.org}TomCat}}  (or another servlet container).
+  
+   * Deploy the war file, obtained by {{{compile.html}compile step}} into the Servlet container.

@@ -1,0 +1,50 @@
+ -----
+ OpenTox Policy service
+ -----
+ Background
+ -----
+ July 2011
+
+OpenTox Policy service
+~~~~~~~  
+   
+   	 * Install {{{http://maven.apache.org} Apache Maven}} build tool
+
+	 * Configure your maven profile
+	 
+------------
+
+  <profile>
+      <id>policy</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+	<openssouser>OpenAM admin user name</openssouser>
+	<openssopassword>OpenAM admin password</openssopassword>
+	<openssoservice>URI of the The OpenSSO/OpenAM service</openssoservice>
+      </properties>
+    </profile>
+
+------------
+
+     * Retrieve the source from {{{https://github.com/vedina/Pol}GitHub}}. 
+     
+     * Run with
+     
+-----------
+
+mvn clean package -P policy
+
+------------     
+      
+    * The Pol-{version}.war file is in the target directory
+      
+    * Test with 
+      
+---------
+
+mvn tomcat:run
+
+---------      
+     
