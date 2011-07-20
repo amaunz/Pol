@@ -5,6 +5,8 @@ This is OpenTox Policy service.
 1.1. Make sure the following entry is configured in your .m2/settings.xml 
 
 <!-- Start config -->
+<profiles>
+...
     <profile>
       <id>policy-test</id>
       <activation>
@@ -16,6 +18,7 @@ This is OpenTox Policy service.
 	<openssoservice>URI of the The OpenSSO/OpenAM service</openssoservice>
       </properties>
     </profile>
+</profiles>    
 <!-- End config-->
 
 1.2. Build by 
