@@ -74,9 +74,8 @@ public class PolicyCreator extends PolicyHelper {
 			
 			log(String.format(msg_token_resolved,token_user));
 
-
 			// Read XML
-			if (is != null) {
+			if ((ret.status==200) && (is != null)) {
 				String line;
 				try {
 					iss = new InputStreamReader(is, "UTF-8");
@@ -94,15 +93,18 @@ public class PolicyCreator extends PolicyHelper {
 
 				}
 				finally {
-					p2.close();
-					out2.close();
-					reader.close();
-					iss.close();
-					is.close();
+					if (p2 != null) p2.close();
+					if (out2!=null) out2.close();
+					if (reader != null) reader.close();
+					if (iss!=null) iss.close();
+					if (is!=null) is.close();
 				}
 			} 
-			else 
-				exception=new RestException(400,msg_missingxml);
+			else {
+				exception=new RestException(502,
+						String.format("Error %d querying OpenAM service. Can't retrieve XML",ret.status)
+						);
+			}
 			
 		} catch (RestException x) {
 			exception=x;
@@ -114,7 +116,7 @@ public class PolicyCreator extends PolicyHelper {
 
 		//hm, not so elegant
 		if (exception!=null) {
-			temp2.delete();
+			try { if ((temp2!=null) && temp2.exists()) temp2.delete();} catch (Exception x) { log(x.getMessage()); }
 			log(exception.getMessage());
 			throw exception;
 		} else {
@@ -128,7 +130,7 @@ public class PolicyCreator extends PolicyHelper {
 				log(msg_malformedXML);
 				throw new RestException(400,msg_malformedXML);
 			} finally {
-				temp2.delete();
+				if ((temp2!=null) && temp2.exists()) temp2.delete();
 			}
 
 
