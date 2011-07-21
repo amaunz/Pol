@@ -23,7 +23,6 @@ public class ParsePolicy {
 	public ArrayList<Policy> runParser(String filename) throws Exception {
 		parseXmlFile(filename);
 		parseDocument();
-//		printData();
 		return myPols;
 	}
 	

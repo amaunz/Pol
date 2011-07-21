@@ -24,18 +24,5 @@ public class Html2Text extends HTMLEditorKit.ParserCallback {
    return s.toString();
  }
 
-// public static void main (String[] args) {
-//   try {
-//     // the HTML to convert
-//     FileReader in = new FileReader("err.html");
-//     Html2Text parser = new Html2Text();
-//     parser.parse(in);
-//     in.close();
-//     System.out.println(parser.getText());
-//   }
-//   catch (Exception e) {
-//     e.printStackTrace();
-//   }
-// }
 
 }

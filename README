@@ -1,17 +1,12 @@
 This is OpenTox Policy service. 
 
-Build by 
->mvn package
+1. Compile
 
-Run by
->mvn tomcat:run
-
-Or deploy into a servlet container
-
-1) Before compiling
-The following entry should be configured in your .m2/settings.xml 
+1.1. Make sure the following entry is configured in your .m2/settings.xml 
 
 <!-- Start config -->
+<profiles>
+...
     <profile>
       <id>policy-test</id>
       <activation>
@@ -23,18 +18,53 @@ The following entry should be configured in your .m2/settings.xml
 	<openssoservice>URI of the The OpenSSO/OpenAM service</openssoservice>
       </properties>
     </profile>
+</profiles>    
 <!-- End config-->
 
-2) Before deployment
+1.2. Build by 
+>mvn package
 
-2a) MySQL
+The output looks like:
+
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Policy service
+[INFO]    task-segment: [package]
+[INFO] ------------------------------------------------------------------------
+[INFO] [resources:resources {execution: default-resources}]
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 2 resources
+[INFO] Copying 1 resource
+[....
+[INFO] Packaging webapp
+[INFO] Assembling webapp[Pol] in [{your-dir}/Pol-0.0.3-SNAPSHOT]
+[INFO] Processing war project
+[INFO] Copying webapp resources[{your-dir}/Pol/src/main/webapp]
+[INFO] Webapp assembled in[516 msecs]
+[INFO] Building war: {your-dir}/target/Pol-0.0.3-SNAPSHOT.war
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 28 seconds
+[INFO] Finished at: Wed Jul 20 12:22:19 EEST 2011
+[INFO] Final Memory: 19M/220M
+[INFO] ------------------------------------------------------------------------
+
+The .war file will be in the target folder. 
+
+2. Run by
+>mvn tomcat:run
+
+3. Or deploy into a servlet container
+3.1. MySQL
 The Policy service requires MySQL and existing 'pol' database :
 
-CREATE DATABASE pol;
+CREATE DATABASE Pol;
 
 Create database table(s) as in https://github.com/vedina/Pol/blob/master/src/main/resources/org/opentox/pol/db.sql
 
-2b) Configuration
+3.2. Configuration
+
 If the Pol.war was not compiled with the correct settings, as described in 1), these could be changed after deployment:
 
 Edit the following file:
